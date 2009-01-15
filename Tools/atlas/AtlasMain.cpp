@@ -8,11 +8,6 @@
 
 using namespace std;	
 
-bool bAddFillChar;
-unsigned char FillChar;
-unsigned int LastPos;
-
-
 int _tmain(int argc, _TCHAR* argv[])
 {
 	clock_t StartTime, EndTime, ElapsedTime;

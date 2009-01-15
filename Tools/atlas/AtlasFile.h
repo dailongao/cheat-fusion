@@ -7,10 +7,6 @@
 #include "PointerHandler.h"
 #include "AtlasExtension.h"
 
-extern bool bAddFillChar;
-extern unsigned char FillChar;
-extern unsigned int LastPos;
-
 static const unsigned int STR_ENDTERM = 0;
 static const unsigned int STR_PASCAL = 1;
 static const unsigned int StringTypeCount = 2;
@@ -21,8 +17,9 @@ class AtlasFile
 public:
 	AtlasFile();
 	~AtlasFile();
-
-	void Fill(unsigned char filldata);
+	
+	unsigned int GetLastPos();
+	void FillTest(int count);
 
 	bool AutoWrite(PointerList* List, std::string& EndTag);
 	bool AutoWrite(PointerTable* Tbl, std::string& EndTag);
@@ -49,8 +46,6 @@ public:
 	void SetScriptBuf(std::list<TBL_STRING>& Strings);
 	unsigned int GetStringType();
 
-
-
 private:
 	FILE* file;
 	unsigned int Filesize;
@@ -73,4 +68,6 @@ private:
 
 	unsigned int StrType;
 	unsigned int PascalLength;
+	
+	unsigned int LastPos;
 };

@@ -261,14 +261,19 @@ bool AtlasCore::ExecuteCommand(Command& Cmd)
 	switch(Cmd.Function)
 	{
 	case CMD_TEST:
-		while( (File.GetPos()%StringToUInt(Cmd.Parameters[1].Value)) != StringToUInt(Cmd.Parameters[0].Value) )
-			File.Fill(0x1f);		//为了对齐,默认填充0x1f
+		{
+		unsigned int val1=StringToUInt(Cmd.Parameters[1].Value);
+		unsigned int val0=StringToUInt(Cmd.Parameters[0].Value);
+		unsigned int val =File.GetPos()%val1;
+		if(val!=val0)
+			File.FillTest(val1-val+val0);
 		return true;
+		}
 	case CMD_FILLTO:
-		if(LastPos>StringToUInt(Cmd.Parameters[0].Value)) printf("LastPos ERROR!ScriptData overflowed!\n");
-		File.Move(LastPos, StringToUInt(Cmd.Parameters[0].Value));
+		if(File.GetLastPos()>StringToUInt(Cmd.Parameters[0].Value)) printf("LastPos ERROR!ScriptData overflowed!\n");
+		File.Move(File.GetLastPos(), StringToUInt(Cmd.Parameters[0].Value));
 		Logger.Log("%6u FILL       ROM Position is now $%X with max bound of $%X\n",
-			Cmd.Line, LastPos, StringToUInt(Cmd.Parameters[0].Value));
+			Cmd.Line, File.GetLastPos(), StringToUInt(Cmd.Parameters[0].Value));
 		Stats.NewStatsBlock(File.GetPos(), StringToUInt(Cmd.Parameters[0].Value), Cmd.Line);
 		IsInJmp = true;
 		return true;
