@@ -98,7 +98,12 @@ int ExportScriptBlock(FILE *rom_fp, script_block *blk, TBLINFO *tableinfo, expor
 		printf("error on create %s!\n",filename);
 		return 1;
 	}
-	fprintf(ptr_fp,"PointBASE:$%08X;Count:%d\n",blk->ptr_base_val,blk->count);
+	
+	char offstr[12];
+	if(blk->text>=blk->ptr_base_val) sprintf(offstr,"$%08X", blk->text-blk->ptr_base_val);
+	else sprintf(offstr,"$-%08X", blk->ptr_base_val-blk->text);
+	fprintf(ptr_fp,"AtlasPtrOffset:%s;TextBase:%08X;PointBase:%08X;Count:%d\n", offstr,
+		blk->text,blk->ptr_base_val,blk->count);
 	
 	unsigned int txt_number=1;
 	for(i=0;i<blk->count;i++){
