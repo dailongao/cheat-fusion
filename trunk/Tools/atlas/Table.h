@@ -97,12 +97,17 @@ public:
 	unsigned int StringCount;
 	bool bAddEndToken;
 
+	bool bAddFillChar;
+	unsigned char FillChar;
+	unsigned char TestFillChar;
+	
 private:
 
 	
 	inline void InitHexTable();
 
 	inline bool parsefillchar(std::ifstream& file);
+	inline bool parsetestfillchar(std::ifstream& file);
 	inline bool parsebookmark(std::ifstream& file);
 	inline bool parseendline(std::ifstream& file);
 	inline bool parseendstring(std::ifstream& file);

@@ -4,6 +4,7 @@
 	Version="8.00"
 	Name="Atlas"
 	ProjectGUID="{EFF7695B-E1D6-4C95-847C-A37EC2A929B9}"
+	RootNamespace="Atlas"
 	Keyword="Win32Proj"
 	>
 	<Platforms>

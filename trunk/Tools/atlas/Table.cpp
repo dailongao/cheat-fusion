@@ -32,6 +32,7 @@ Table::Table()
 
 	bAddFillChar=false;
 	FillChar=0;
+	TestFillChar=0;
 }
 
 // Destructor
@@ -248,6 +249,11 @@ int Table::OpenTable(const char* TableFilename)
 				break;
 			else
 				return TBL_PARSE_ERROR;
+		case '~':
+			if(parsetestfillchar(TblFile))
+				break;
+			else
+				return TBL_PARSE_ERROR;
 		default:
 			if(parseentry(TblFile))
 				break;
@@ -264,7 +270,7 @@ int Table::OpenTable(const char* TableFilename)
 
 
 
-//@xx形式 xx作为jmp命令界限填充符号
+//"@xx"形式 xx作为jmp命令界限填充符号
 inline bool Table::parsefillchar(ifstream& file)
 {
 	char testch;
@@ -293,7 +299,33 @@ inline bool Table::parsefillchar(ifstream& file)
 	return true;
 }
 
-
+//"~xx"形式 xx作为test命令填充符号
+inline bool Table::parsetestfillchar(ifstream& file)
+{
+	char testch;
+	unsigned char temp[4],count=0;
+	temp[0]=0;temp[1]=0;	//若只有"~"符号,默认填充0
+	
+	file.get(testch); // the ~
+	parsews(file);
+	
+	// Get the hex
+	while(true)
+	{
+		file.get(testch);
+		if((testch == '\n') || file.eof() || (testch == '='))
+			break;
+		temp[count++]=HexToDec(testch);
+	}
+	
+	if(testch == '\n') // 正常的"~xx"填充符号
+	{
+		TestFillChar = temp[0]*16 + temp[1];
+	}
+	else return false;
+	
+	return true;
+}
 
 //-----------------------------------------------------------------------------
 // parsebookmark() - Parses a bookmark like (8000h)Text1

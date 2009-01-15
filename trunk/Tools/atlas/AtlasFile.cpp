@@ -56,14 +56,22 @@ void AtlasFile::Write(const void* Data, const unsigned int Size,
 	fseek(file, OldPos, SEEK_SET);
 }
 
-void AtlasFile::Fill(unsigned char filldata)
+void AtlasFile::FillTest(int count)
 {
-	fputc(filldata,file);
+	int i;
+	for(i=0;i<count;i++)
+		fputc(ActiveTbl->TestFillChar,file);
+	LastPos=ftell(file);
 }
 
 unsigned int AtlasFile::GetPos()
 {
 	return ftell(file);
+}
+
+unsigned int AtlasFile::GetLastPos()
+{
+	return LastPos;
 }
 
 FILE* AtlasFile::GetFile()
@@ -298,13 +306,11 @@ bool AtlasFile::FlushText()
 
 			WriteString(i->Text);
 		}
-
-		if( (bAddFillChar==true) && (MaxScriptPos!=-1) ) {		//jump命令时,填充字符
+		if( (ActiveTbl->bAddFillChar==true) && (MaxScriptPos!=-1) ) {		//jump命令时,填充字符
 			unsigned int temp,num=GetMaxWritableBytes();
-			for(temp=0;temp<num;temp++) fputc(FillChar,file);
+			for(temp=0;temp<num;temp++) fputc(ActiveTbl->FillChar,file);
 		}
-		LastPos=GetPos();		//获取insert结束时文件打开位置
-
+		LastPos=ftell(file);		//获取insert结束时文件打开位置
 	}
 	else if(StrType == STR_PASCAL)
 	{
