@@ -578,7 +578,7 @@ void CPsxExe::disassemble(char *name, word from, word to) // from and to must be
 
 		if(syms.lookup((i<<2)+loadAddress,sym))
 		{
-			sprintf(line,"\n%08X\t%s:\n",(i<<2)+loadAddress,sym.data());
+			sprintf(line,"\n%08X\t\t\t%s:\n",(i<<2)+loadAddress,sym.data());
 			fputs(line,file);
 		}
 
@@ -629,7 +629,7 @@ void CPsxExe::disassemble(char *name, word from, word to) // from and to must be
 					} 
 
 					//fputs(disasmtemp,file);
-					fprintf(file, "%08X\t\t%s", (i<<2)+loadAddress, disasmtemp);
+					fprintf(file, "%08X:0x%08X\t\t%s", (i<<2)+loadAddress, d, disasmtemp);
 					
 					fputc('\n',file);
 					
@@ -648,7 +648,7 @@ void CPsxExe::disassemble(char *name, word from, word to) // from and to must be
 			} 			
 			
 			//fputs(disasmtemp,file);
-			fprintf(file, "%08X\t\t%s", (i<<2)+loadAddress, disasmtemp);
+			fprintf(file, "%08X:0x%08X\t\t%s", (i<<2)+loadAddress, d, disasmtemp);
 			
 			fputc('\n',file);
 			
