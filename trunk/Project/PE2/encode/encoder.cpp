@@ -20,8 +20,8 @@ typedef struct
 
 //#define DEBUG_LZ
 
-unsigned char buffer[0x4000];
-short buf_ptr;
+unsigned char buffer[0x100000];
+int buf_ptr;
 
 
 void Decode(FILE *fp, int offset, FILE *out)
@@ -100,92 +100,40 @@ void Decode(FILE *fp, int offset, FILE *out)
 	}
 }
 
-int main()
-{
-	FILE *in,*out;
-	in=fopen("zk_enc","rb");
-	out=fopen("zk_dec","wb");
-	
-	Decode(in, 0x28, out);
-	fclose(in);fclose(out);
-	return 0;
-}
+
 
 ///////////////////////////////////////////////////////
 
-void LZ_Decode( FILE *fp, int offset )
+void LZ_Decode(FILE *fp, int offset, FILE *out)
 {
-	short loops;
-
-	// init
-	buf_ptr = 0;
-	loops = 0;
-
+	buf_ptr = 1;
 	fseek( fp, offset, SEEK_SET );
-	fread( &loops, 1, 2, fp );
 
-	// start going through each block
-	while( loops-- ) {
-		int data;
-		int bits;
-		bool decode;
-
-		decode = 1;
-		while( decode ) {
-			
-			// read encoding method bits
-			data = fgetc( fp );
-			bits = 8;
-
-			// go through all 8 bits
-			while( ( bits-- ) && decode ) {
-
-				// Raw byte copy
-				if( data & 1 ) {
-					buffer[ buf_ptr++ ] = fgetc( fp );
-				}
-				// LZ copy
-				else {
-					short delta, window;
-
-					// grab parameters
-					delta = fgetc( fp );
-					window = fgetc( fp );
-
-					// stop condition
-					if( delta == 0 && window == 0 ) {
-						decode = 0;
-					}
-
-					// high 3-bits of window are delta values, assert other 5-bits
-					delta |= ( ( window & 0xe0 ) >> 5 ) << 8;
-					delta |= 0xf800;
-
-					// low 5-bits of window are the real values
-					window &= 0x1f;
-					window++;
-
-					// LZSS has two overhead in this case
-					window += 2;
-
-					// copy for size of LZ window
-					while( window-- ) {
-						buffer[ buf_ptr ] = buffer[ buf_ptr + delta ];
-						buf_ptr++;
-					}
-				} // end method check
-
-				// consume 1 bit
-				data >>= 1;
-			} // end check bits
-		} // end decode
-	} // stop full decoder
-
-#ifdef DEBUG_LZ
-	FILE *debug = fopen( "debug.bin", "wb" );
-	fwrite( buffer, 1, buf_ptr, debug );
-	fclose( debug );
-#endif
+	unsigned int testch,ch;
+	int pos,len;
+	while(1){
+		testch=fgetc(fp);
+		//printf("%02x",testch);getch();
+		if(testch==1){
+			ch=fgetc(fp);
+			buffer[buf_ptr++]=ch;
+			buf_ptr&=0xff;
+			fputc(ch,out);
+		}
+		else if(testch==0){
+			pos=fgetc(fp);
+			len=fgetc(fp)+1;
+			while(len>=0){
+				buffer[buf_ptr++]=buffer[pos];
+				fputc(buffer[pos],out);
+				buf_ptr&=0xff;
+				pos++;
+				pos&=0xff;
+				len--;
+			}
+		}
+		else return;
+	}
 }
 
 //////////////////////////////////////////////////////////
@@ -199,9 +147,9 @@ int size = 0;
 int max_runs = 0;
 int max_delta = 0;
 
-int min_match = 1+2;
-int window_size = 0x1000-1;		// 12-bits
-int max_match = 15+3;					// 4-bits
+int min_match = 2;
+int window_size = 0x100-1;
+int max_match = 15+2;
 
 
 void Find_LZ( int start, unsigned char byte, int &length, int &pos )
@@ -217,7 +165,7 @@ void Find_LZ( int start, unsigned char byte, int &length, int &pos )
 		// invalid string; stop scanning
 		if( ptr >= start )
 			break;
-
+			
 		// LZ window restriction
 		if( start - ptr > window_size )
 			continue;
@@ -254,7 +202,7 @@ void LZ_Encode( FILE *in, FILE *out )
 	int counter = 0;
 
 	// Step 0: Check file size
-	fread( buffer, 1, 0x4000, in );
+	fread( buffer, 1, 0x100000, in );
 	size = ftell( in );
 	fseek( in, 0, SEEK_SET );
 
@@ -292,7 +240,7 @@ void LZ_Encode( FILE *in, FILE *out )
 		if( length >= min_match ) {
 			// Found substring match; record and re-do
 			lz.pos = start;
-			lz.ptr = pos - start;
+			lz.ptr = start>window_size? window_size+1-(start-pos):pos+1;
 			lz.len = length;
 			
 			lz_table.push_back( lz );
@@ -316,14 +264,14 @@ void LZ_Encode( FILE *in, FILE *out )
 
 ///////////////////////////////////////////////////////////////
 
-	int lz_ptr;
+	int lz_p;
 	int out_byte;
 	int out_bits;
 	int out_ptr;
 	unsigned char out_buffer[0x100];
 
 	// init
-	lz_ptr = 0;
+	lz_p = 0;
 	start = 0;
 	out_ptr = 0;
 	out_byte = 0;
@@ -331,55 +279,36 @@ void LZ_Encode( FILE *in, FILE *out )
 
 	// Step 2: Prepare encoding methods
 
-	// LZ decoder
-	fputc( 0x01, out );
-
 	while( start < size ) {
-		lz = lz_table[ lz_ptr ];
-		out_byte >>= 1;
-
+		lz = lz_table[ lz_p ];
 		if( lz.pos == start ) {
-
 			// LZ
-			out_byte |= ( 0 << 7 );
-			out_buffer[ out_ptr++ ] = lz.ptr & 0xff;
-			out_buffer[ out_ptr ] = ( ( lz.len - 1 - 2 ) & 0x0f ) << 4;
-			out_buffer[ out_ptr++ ] |= ( lz.ptr & 0xf00 ) >> 8;
-
+			fputc(0x00,out);
+			fputc(lz.ptr,out);
+			fputc(lz.len-min_match,out);
 			start += lz.len;
-			lz_ptr++;
+			lz_p++;
 		}
 		else {
 			// Free byte
-			out_byte |= ( 1 << 7 );
-			out_buffer[ out_ptr++ ] = buffer[ start ];
-
+			fputc(0x01,out);
+			fputc(buffer[start],out);
 			start++;
 		}
-
-		// flush out data
-		out_bits--;
-		if( !out_bits ) {
-			fputc( out_byte, out );
-			fwrite( out_buffer, 1, out_ptr, out );
-			
-			out_ptr = 0;
-			out_byte = 0;
-			out_bits = 8;
-		}
 	} // end method check
-
-	// add termination code
-	out_byte >>= 1;
-	out_byte |= ( 0 << 7 );
-	out_buffer[ out_ptr++ ] = 0;
-	out_buffer[ out_ptr++ ] = 0;
-	out_bits--;
-
-	// shove in dummy bits
-	while( out_bits-- ) out_byte >>= 1;
-
-	// flush out data
-	fputc( out_byte, out );
-	fwrite( out_buffer, 1, out_ptr, out );
+	
+	fputc(0xFF,out);
 }
+
+int main()
+{
+	FILE *in,*out;
+	in=fopen("zk_dec","rb");
+	out=fopen("zk_dec.enc","wb");
+	
+	//LZ_Decode(in,0,out);
+	LZ_Encode(in,out);
+	fclose(in);fclose(out);
+	return 0;
+}
+
