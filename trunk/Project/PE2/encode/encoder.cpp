@@ -140,8 +140,7 @@ int window_size = 0x100-1;
 int max_match = 15+2;
 
 unsigned char cache[0x100];
-unsigned int cache_count = 1;
-unsigned int cache_filled = 0;
+int cache_count = 1;
 
 void CachePush(unsigned int number)
 {
@@ -149,7 +148,6 @@ void CachePush(unsigned int number)
 		table[ cache[cache_count] ].pop_front();
 	}
 	table[ buffer[number] ].push_back(cache_count);
-	if(cache_count==0) cache_filled=1;
 	cache[cache_count++]=buffer[number];
 	cache_count&=window_size;
 }
@@ -174,8 +172,8 @@ void CacheLZFind( int start, unsigned char byte, int &length, int &pos )
 			if( buffer[ lcv2 ] != cache[ ptr ] )
 				break;
 				
-			if((cache_filled==1) && (ptr>window_size)) break;
-			if((cache_filled==0) && (ptr>=cache_count)) break;
+			if((start>=window_size) && (ptr>window_size)) break;
+			if((start<window_size) && (ptr>=cache_count)) break;
 			if((cache_count>=base) && (ptr>=cache_count)) break;//prevent next char overwrited before copy
 			
 			// keep looking
@@ -252,8 +250,8 @@ void CacheLZEncode( FILE *in, FILE *out )
 int main()
 {
 	FILE *in,*out;
-	in=fopen("txt_dec.enc","rb");
-	out=fopen("txt_dec.enc.dec","wb");
+	in=fopen("zk_dec.enc","rb");
+	out=fopen("zk_dec.enc.dec","wb");
 	
 	LZ_Decode(in,0,out);
 	//CacheLZEncode(in,out);
