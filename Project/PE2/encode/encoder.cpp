@@ -1,3 +1,4 @@
+//适用于PE2,windows填充不同于一般lz,到头后又返回原点填充
 #include <stdio.h>
 #include <fcntl.h>
 #include <string.h>
@@ -10,15 +11,6 @@
 
 using namespace std;
 
-typedef struct
-{
-	int pos;
-	int ptr;
-	int len;
-} lz_find;
-
-
-//#define DEBUG_LZ
 
 unsigned char buffer[0x100000];
 int buf_ptr;
@@ -138,44 +130,54 @@ void LZ_Decode(FILE *fp, int offset, FILE *out)
 
 //////////////////////////////////////////////////////////
 
-vector<int> table[256];
-deque<lz_find> lz_table;
+deque<int> table[256];
 
 int ptr = 0;
 int size = 0;
-
-int max_runs = 0;
-int max_delta = 0;
 
 int min_match = 2;
 int window_size = 0x100-1;
 int max_match = 15+2;
 
+unsigned char cache[0x100];
+unsigned int cache_count = 1;
+unsigned int cache_filled = 0;
 
-void Find_LZ( int start, unsigned char byte, int &length, int &pos )
+void CachePush(unsigned int number)
+{
+	if(number>window_size){
+		table[ cache[cache_count] ].pop_front();
+	}
+	table[ buffer[number] ].push_back(cache_count);
+	if(cache_count==0) cache_filled=1;
+	cache[cache_count++]=buffer[number];
+	cache_count&=window_size;
+}
+
+void CacheLZFind( int start, unsigned char byte, int &length, int &pos )
 {
 	int longest_length = 0;
 	int longest_ptr = 0;
+	deque<int>::iterator it;
 
 	// use cached positions to quickly look through the file
-	for( int lcv = 0; lcv < table[ byte ].size(); lcv++ ) {
+	for(it=table[ byte ].begin(); it!=table[ byte ].end(); it++) {
 		int match_length = 0;
-		int ptr = table[ byte ][ lcv ];
-
-		// invalid string; stop scanning
-		if( ptr >= start )
-			break;
+		int ptr = *it;
+		int base = ptr;
+		
+		if( ptr >= start ) break;	
 			
-		// LZ window restriction
-		if( start - ptr > window_size )
-			continue;
-
 		// search for longest identical substring
 		for( int lcv2 = start; ( lcv2 < start + max_match ) && ( lcv2 < size ); lcv2++ ) {
 			// look for a mismatch
-			if( buffer[ lcv2 ] != buffer[ ptr ] )
+			if( buffer[ lcv2 ] != cache[ ptr ] )
 				break;
-
+				
+			if((cache_filled==1) && (ptr>window_size)) break;
+			if((cache_filled==0) && (ptr>=cache_count)) break;
+			if((cache_count>=base) && (ptr>=cache_count)) break;//prevent next char overwrited before copy
+			
 			// keep looking
 			ptr++;
 			match_length++;
@@ -183,7 +185,7 @@ void Find_LZ( int start, unsigned char byte, int &length, int &pos )
 
 		// record new long find
 		if( longest_length <= match_length ) {
-			longest_ptr = table[ byte ][ lcv ];
+			longest_ptr = *it;
 			longest_length = match_length;
 		}
 	}
@@ -193,22 +195,15 @@ void Find_LZ( int start, unsigned char byte, int &length, int &pos )
 	pos = longest_ptr;
 }
 
-
-void LZ_Encode( FILE *in, FILE *out )
+void CacheLZEncode( FILE *in, FILE *out )
 {
-	lz_find lz;
 	int start;
 	int lcv;
 	int counter = 0;
 
-	// Step 0: Check file size
 	fread( buffer, 1, 0x100000, in );
 	size = ftell( in );
 	fseek( in, 0, SEEK_SET );
-
-////////////////////////////////////////////////
-
-	// Step 1: Find all LZ matches
 	start = 0;
 
 	while( start < size ) {
@@ -219,95 +214,49 @@ void LZ_Encode( FILE *in, FILE *out )
 		int pos;
 
 		// Prepare for LZ
-		table[ buffer[ start ] ].push_back( start );
-
+		CachePush(start);
 		// Go find the longest substring match (and future ones)
-		Find_LZ( start, buffer[ start ], length, pos );
-
-		// Slightly increase ratio performance
-		for( lcv = 0; lcv < 1; lcv++) {
-			start++; table[ buffer[ start ] ].push_back( start );
-			Find_LZ( start, buffer[ start ], future_length[ lcv ], future_pos[ lcv ]);
-		}
-
-		// Un-do lookahead
-		for( lcv = 1; lcv > 0; lcv-- ) {
-			table[ buffer[ start ] ].pop_back(); start--;
-			if( future_length[ lcv-1 ] - length >= lcv )
-				length = 0;
-		}
-
+		CacheLZFind( start, buffer[ start ], length, pos );
+		
 		if( length >= min_match ) {
-			// Found substring match; record and re-do
-			lz.pos = start;
-			lz.ptr = start>window_size? window_size+1-(start-pos):pos+1;
-			lz.len = length;
+/*			if(start>=0xc5a && start+length<=0xc60){
+				printf("start:%x;pos:%02x,len:%02x,cachecount:%02x\n",start,pos,length,cache_count);
+				FILE *debug;
+				debug=fopen("debug.bin","wb");
+				fwrite(cache,1,0x100,debug);
+				fclose(debug);
+				getch();
+			}*/
 			
-			lz_table.push_back( lz );
-
+			fputc(0x00,out);
+			fputc(pos,out);
+			fputc(length-min_match,out);
+			
 			// Need to add to LZ table
 			for( int lcv = 1; lcv < length; lcv++ )
-				table[ buffer[ start + lcv ] ].push_back( start + lcv );
-
+				CachePush(start + lcv);
+			
 			// Fast update
 			start += length;
 		}
 		else {
-			// No substrings found; try again
-			start++;
-		}
-	}
-
-	// insert dummy entry
-	lz.pos = -1;
-	lz_table.push_back( lz );
-
-///////////////////////////////////////////////////////////////
-
-	int lz_p;
-	int out_byte;
-	int out_bits;
-	int out_ptr;
-	unsigned char out_buffer[0x100];
-
-	// init
-	lz_p = 0;
-	start = 0;
-	out_ptr = 0;
-	out_byte = 0;
-	out_bits = 8;
-
-	// Step 2: Prepare encoding methods
-
-	while( start < size ) {
-		lz = lz_table[ lz_p ];
-		if( lz.pos == start ) {
-			// LZ
-			fputc(0x00,out);
-			fputc(lz.ptr,out);
-			fputc(lz.len-min_match,out);
-			start += lz.len;
-			lz_p++;
-		}
-		else {
-			// Free byte
 			fputc(0x01,out);
 			fputc(buffer[start],out);
 			start++;
 		}
-	} // end method check
-	
-	fputc(0xFF,out);
+	}
+	fputc(0xff,out);
 }
+
 
 int main()
 {
 	FILE *in,*out;
-	in=fopen("zk_dec","rb");
-	out=fopen("zk_dec.enc","wb");
+	in=fopen("txt_dec.enc","rb");
+	out=fopen("txt_dec.enc.dec","wb");
 	
-	//LZ_Decode(in,0,out);
-	LZ_Encode(in,out);
+	LZ_Decode(in,0,out);
+	//CacheLZEncode(in,out);
 	fclose(in);fclose(out);
 	return 0;
 }
