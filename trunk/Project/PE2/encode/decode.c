@@ -9,7 +9,6 @@ void Decode(FILE *fp, int offset, FILE *out)
 {
 	unsigned int data,bits,flag,ch,bitmask,nextch,testch;
 	int win_pos,win_len;
-	int counts=0;
 	fseek( fp, offset, SEEK_SET );
 	buf_ptr=1;
 	flag=0;
@@ -40,16 +39,14 @@ void Decode(FILE *fp, int offset, FILE *out)
 			bits-=bitmask;
 			ch=(ch<<bitmask)|(((flag^0xff)&data)>>bits);
 		}
-		//printf("%02X,",ch);getch();
+		printf("%02X,",ch);getch();
 		if((int)testch>0){		//raw byte
 			buffer[buf_ptr++]=ch;
 			buf_ptr&=0xff;
 			fputc(ch,out);
-			counts+=2;
 		}
 		else{			
 			if(ch==0) break;
-			counts+=3;
 			bitmask=4;
 			win_len=0;
 			if(flag==0){
@@ -69,7 +66,7 @@ void Decode(FILE *fp, int offset, FILE *out)
 			bits-=bitmask;
 			nextch=nextch&(flag^0xff);
 			win_len=(win_len<<bitmask)|(nextch>>bits);
-			//printf("winlen:%02x,",win_len);getch();
+			printf("winlen:%02x,",win_len);getch();
 			win_len++;
 			win_pos=ch&0xff;
 			while(win_len>=0){
@@ -82,7 +79,6 @@ void Decode(FILE *fp, int offset, FILE *out)
 			}
 		}
 	}
-	printf("count:%d\n",counts);getch();
 }
 
 
@@ -132,8 +128,8 @@ int main()
 	in=fopen(name,"rb");
 	out=fopen(outname,"wb");
 	
-	//Decode(in,0x28,out);
-	LZ_Decode(in,0,out);
+	Decode(in,0,out);
+	//LZ_Decode(in,0,out);
 	fclose(in);fclose(out);
 	return 0;
 }

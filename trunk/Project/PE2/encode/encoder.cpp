@@ -137,19 +137,37 @@ void CacheLZEncode( FILE *in, FILE *out )
 
 void ConvertEncode( FILE *infile, FILE *outfile )
 {
-	int outc=0,c=0;
-	unsigned int flag,bits,lastch,ch=write_buf[c++];
+	int outc=0,count=0;
+	unsigned int flag,bits,lastch,ch,nextch,testch;
 	
 	lastch=0;
-	while(ch!=0xff){
-		if(ch==1){
+	bits=8;
+	while(write_buf[count]!=0xff){
+		bits--;
+		if(write_buf[count]==1){
+			ch=write_buf[count+1];
+			testch=(1<<bits)|(ch>>(8-bits))|(lastch<<bits)&0xff;
+			buffer[outc++]=testch;
+			lastch=ch;
+			count+=2;
+		}
+		else if(write_buf[count]==0){
+			ch=write_buf[count+1];
+			testch=(ch>>(8-bits))|(lastch<<bits)&((1<<bits)^0xff);
+			buffer[outc++]=testch;
+			lastch=ch;
+			ch=write_buf[count+2];
+			testch=(ch>>(8-bits))|(lastch<<bits)&((1<<bits)^0xff);
+			buffer[outc++]=testch;
+			lastch=ch;
+			count+=3;
 		}
 		else{
+			printf("error!\n");
 		}
-		ch=write_buf[c];
-	}
-	
-	
+		//printf("last:%02x,%02x;",lastch,testch);getch();
+		if(bits==0) bits=8;
+	}	
 	fwrite(buffer,1,outc,outfile);
 }
 
@@ -165,7 +183,7 @@ int main()
 	out=fopen(outname,"wb");
 	
 	CacheLZEncode(in,out);
-
+	ConvertEncode(in,out);
 	
 	fclose(in);fclose(out);
 	return 0;
