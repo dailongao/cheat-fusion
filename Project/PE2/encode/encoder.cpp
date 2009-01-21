@@ -13,7 +13,7 @@ using namespace std;
 
 
 unsigned char buffer[0x100000];
-int buf_ptr;
+unsigned char write_buf[0x200000];
 
 
 //////////////////////////////////////////////////////////
@@ -85,7 +85,8 @@ void CacheLZEncode( FILE *in, FILE *out )
 	int start;
 	int lcv;
 	int counter = 0;
-
+	int write_ptr=0;
+	
 	fread( buffer, 1, 0x100000, in );
 	size = ftell( in );
 	fseek( in, 0, SEEK_SET );
@@ -113,10 +114,9 @@ void CacheLZEncode( FILE *in, FILE *out )
 				fclose(debug);
 				getch();
 			} */
-			
-			fputc(0x00,out);
-			fputc(pos,out);
-			fputc(length-min_match,out);
+			write_buf[write_ptr++]=00;
+			write_buf[write_ptr++]=pos;
+			write_buf[write_ptr++]=length-min_match;
 			
 			// Need to add to LZ table
 			for( int lcv = 1; lcv < length; lcv++ )
@@ -126,14 +126,32 @@ void CacheLZEncode( FILE *in, FILE *out )
 			start += length;
 		}
 		else {
-			fputc(0x01,out);
-			fputc(buffer[start],out);
+			write_buf[write_ptr++]=01;
+			write_buf[write_ptr++]=buffer[start];
 			start++;
 		}
 	}
-	fputc(0xff,out);
+	write_buf[write_ptr++]=0xff;
+	//fwrite(write_buf,1,write_ptr,out);
 }
 
+void ConvertEncode( FILE *infile, FILE *outfile )
+{
+	int outc=0,c=0;
+	unsigned int flag,bits,lastch,ch=write_buf[c++];
+	
+	lastch=0;
+	while(ch!=0xff){
+		if(ch==1){
+		}
+		else{
+		}
+		ch=write_buf[c];
+	}
+	
+	
+	fwrite(buffer,1,outc,outfile);
+}
 
 int main()
 {
@@ -147,6 +165,8 @@ int main()
 	out=fopen(outname,"wb");
 	
 	CacheLZEncode(in,out);
+
+	
 	fclose(in);fclose(out);
 	return 0;
 }
