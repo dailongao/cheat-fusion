@@ -52,7 +52,8 @@ void CacheLZFind( int start, unsigned char byte, int &length, int &pos )
 		int ptr = *it;
 		int base = ptr;
 		
-		if( ptr >= start ) break;
+		if( ptr > start ) break;
+		if(ptr==0) continue;
 			
 		// search for longest identical substring
 		for( int lcv2 = start; ( lcv2 < start + max_match ) && ( lcv2 < size ); lcv2++ ) {
@@ -138,36 +139,39 @@ void CacheLZEncode( FILE *in, FILE *out )
 void ConvertEncode( FILE *infile, FILE *outfile )
 {
 	int outc=0,count=0;
-	unsigned int flag,bits,lastch,ch,nextch,testch;
+	unsigned int flag,bits,ch,restch,testch;
 	
-	lastch=0;
 	bits=8;
-	while(write_buf[count]!=0xff){
+	flag=0xff;
+	restch=0;
+	while(1)
+	{
 		bits--;
-		if(write_buf[count]==1){
-			ch=write_buf[count+1];
-			testch=(1<<bits)|(ch>>(8-bits))|(lastch<<bits)&0xff;
+		ch=write_buf[count];
+		if(ch==1){
+			ch=write_buf[count+1];		
+			testch=(1<<bits)|(ch>>(8-bits))|(restch<<(8-bits));
+			restch=ch&(flag>>bits);	
 			buffer[outc++]=testch;
-			lastch=ch;
 			count+=2;
 		}
-		else if(write_buf[count]==0){
+		else if(ch==0){
 			ch=write_buf[count+1];
-			testch=(ch>>(8-bits))|(lastch<<bits)&((1<<bits)^0xff);
+			testch=(ch>>(8-bits))|(restch<<(8-bits))&((1<<bits)^0xff);
 			buffer[outc++]=testch;
-			lastch=ch;
-			ch=write_buf[count+2];
-			testch=(ch>>(8-bits))|(lastch<<bits)&((1<<bits)^0xff);
+			restch=ch&(flag>>bits);	
+			bits--;
+/*			ch=write_buf[count+2];
+			testch=(ch>>(8-bits))|(restch<<(8-bits))&((1<<bits)^0xff);*/
 			buffer[outc++]=testch;
-			lastch=ch;
 			count+=3;
 		}
-		else{
-			printf("error!\n");
-		}
+		else break;
 		//printf("last:%02x,%02x;",lastch,testch);getch();
 		if(bits==0) bits=8;
-	}	
+	}
+	buffer[outc++]=0;
+	buffer[outc++]=0;
 	fwrite(buffer,1,outc,outfile);
 }
 
