@@ -140,6 +140,7 @@ int window_size = 0x100-1;
 int max_match = 15+2;
 
 unsigned char cache[0x100];
+unsigned char cache_last;
 int cache_count = 1;
 
 void CachePush(unsigned int number)
@@ -164,17 +165,16 @@ void CacheLZFind( int start, unsigned char byte, int &length, int &pos )
 		int ptr = *it;
 		int base = ptr;
 		
-		if( ptr >= start ) break;	
+		if( ptr >= start ) break;
 			
 		// search for longest identical substring
 		for( int lcv2 = start; ( lcv2 < start + max_match ) && ( lcv2 < size ); lcv2++ ) {
 			// look for a mismatch
 			if( buffer[ lcv2 ] != cache[ ptr ] )
 				break;
-				
-			if((start>=window_size) && (ptr>window_size)) break;
-			if((start<window_size) && (ptr>=cache_count)) break;
-			if((cache_count>=base) && (ptr>=cache_count)) break;//prevent next char overwrited before copy
+			
+			if((start>=window_size) && (ptr>window_size)) break;				
+			if(ptr==cache_count) break;
 			
 			// keep looking
 			ptr++;
@@ -205,8 +205,8 @@ void CacheLZEncode( FILE *in, FILE *out )
 	start = 0;
 
 	while( start < size ) {
-		int future_length[10];
-		int future_pos[10];
+		int future_length;
+		int future_pos;
 
 		int length;
 		int pos;
@@ -217,14 +217,15 @@ void CacheLZEncode( FILE *in, FILE *out )
 		CacheLZFind( start, buffer[ start ], length, pos );
 		
 		if( length >= min_match ) {
-/*			if(start>=0xc5a && start+length<=0xc60){
+/* 			if(start>=0x119 && start<=0x120)
+			{
 				printf("start:%x;pos:%02x,len:%02x,cachecount:%02x\n",start,pos,length,cache_count);
 				FILE *debug;
 				debug=fopen("debug.bin","wb");
 				fwrite(cache,1,0x100,debug);
 				fclose(debug);
 				getch();
-			}*/
+			} */
 			
 			fputc(0x00,out);
 			fputc(pos,out);
