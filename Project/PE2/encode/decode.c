@@ -30,10 +30,12 @@ void Decode(FILE *fp, int offset, FILE *out)
 			data = fgetc( fp );
 		}
 		ch=flag&data;
+		//printf("data:%02x,flag:%02X,",data,flag);
 		bitmask-=bits;
 		flag=0xff;
 		bits=8;
 		data = fgetc( fp );
+		//printf("data:%02x,ch:%02X,",data,ch);
 		if(bitmask!=0){
 			flag>>=bitmask;
 			bits-=bitmask;
@@ -45,7 +47,7 @@ void Decode(FILE *fp, int offset, FILE *out)
 			buf_ptr&=0xff;
 			fputc(ch,out);
 		}
-		else{			
+		else{
 			if(ch==0) break;
 			bitmask=4;
 			win_len=0;
@@ -65,8 +67,8 @@ void Decode(FILE *fp, int offset, FILE *out)
 			flag>>=bitmask;
 			bits-=bitmask;
 			nextch=nextch&(flag^0xff);
+			printf("len:%02x,",win_len);
 			win_len=(win_len<<bitmask)|(nextch>>bits);
-			printf("winlen:%02x,",win_len);getch();
 			win_len++;
 			win_pos=ch&0xff;
 			while(win_len>=0){
@@ -113,7 +115,7 @@ void LZ_Decode(FILE *fp, int offset, FILE *out)
 				len--;
 			}
 		}
-		else return;
+		else break;
 	}
 }
 
