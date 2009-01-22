@@ -154,6 +154,7 @@ void ConvertEncode( FILE *infile, FILE *outfile )
 			restch=ch&(flag>>bits);
 			buffer[outc++]=testch;
 			count+=2;
+			if(bits==0) bits=8;
 		}
 		else if(ch==0){
 			bits--;
@@ -161,20 +162,28 @@ void ConvertEncode( FILE *infile, FILE *outfile )
 			testch=(ch>>(8-bits))|(restch<<(8-bits))&((1<<bits)^0xff);
 			buffer[outc++]=testch;
 			restch=ch&(flag>>bits);
+			if(bits==0) bits=8;
 			
 			ch=write_buf[count+2];
 			//printf("bits:%x,ch:%x,restch:%x",bits,ch,restch);getch();
-			testch=(ch<<(bits-4))|(restch<<(bits));
-			bits--;
-			if(write_buf[count+3]==1) testch|=(1<<(bits-4));
-			buffer[outc++]=testch;
-			bits-=3;
-			restch=ch&(flag>>bits);
+			if(bits>=4){
+				testch=(ch<<(bits-4))|(restch<<(bits));
+				bits--;
+				if(write_buf[count+3]==1) testch|=(1<<(bits-4));
+				buffer[outc++]=testch;
+				bits-=3;
+				restch=0;
+			}
+			else{
+				testch=(ch>>(4-bits))|(restch<<(bits));
+				buffer[outc++]=testch;
+				restch=ch&(flag>>bits);
+			}
 			count+=3;
+			if(bits==0) bits=8;
 		}
 		else break;
 		//printf("last:%02x,%02x;",lastch,testch);getch();
-		if(bits==0) bits=8;
 	}
 	buffer[outc++]=0;
 	buffer[outc++]=0;
