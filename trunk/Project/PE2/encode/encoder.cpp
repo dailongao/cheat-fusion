@@ -146,24 +146,30 @@ void ConvertEncode( FILE *infile, FILE *outfile )
 	restch=0;
 	while(1)
 	{
-		bits--;
 		ch=write_buf[count];
 		if(ch==1){
+			bits--;
 			ch=write_buf[count+1];		
 			testch=(1<<bits)|(ch>>(8-bits))|(restch<<(8-bits));
-			restch=ch&(flag>>bits);	
+			restch=ch&(flag>>bits);
 			buffer[outc++]=testch;
 			count+=2;
 		}
 		else if(ch==0){
+			bits--;
 			ch=write_buf[count+1];
 			testch=(ch>>(8-bits))|(restch<<(8-bits))&((1<<bits)^0xff);
 			buffer[outc++]=testch;
-			restch=ch&(flag>>bits);	
+			restch=ch&(flag>>bits);
+			
+			ch=write_buf[count+2];
+			//printf("bits:%x,ch:%x,restch:%x",bits,ch,restch);getch();
+			testch=(ch<<(bits-4))|(restch<<(bits));
 			bits--;
-/*			ch=write_buf[count+2];
-			testch=(ch>>(8-bits))|(restch<<(8-bits))&((1<<bits)^0xff);*/
+			if(write_buf[count+3]==1) testch|=(1<<(bits-4));
 			buffer[outc++]=testch;
+			bits-=3;
+			restch=ch&(flag>>bits);
 			count+=3;
 		}
 		else break;
