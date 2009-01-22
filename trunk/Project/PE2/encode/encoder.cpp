@@ -1,4 +1,5 @@
 //适用于PE2,windows填充不同于一般lz,到头后又返回原点填充
+//PE2的压缩格式,以bit顺序线型排列,所以压缩时候先将各个字节bit释放成bit流,最后一起组合,方便操作
 #include <stdio.h>
 #include <fcntl.h>
 #include <string.h>
