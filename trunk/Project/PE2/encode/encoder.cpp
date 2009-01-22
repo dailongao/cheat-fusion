@@ -14,7 +14,7 @@ using namespace std;
 
 unsigned char buffer[0x100000];
 unsigned char write_buf[0x200000];
-
+unsigned char bitpool[0x1000];
 
 //////////////////////////////////////////////////////////
 
@@ -136,58 +136,61 @@ void CacheLZEncode( FILE *in, FILE *out )
 	//fwrite(write_buf,1,write_ptr,out);
 }
 
-void ConvertEncode( FILE *infile, FILE *outfile )
+int read_count=0;
+int ResolveByte()
 {
-	int outc=0,count=0;
-	unsigned int flag,bits,ch,restch,testch;
-	
-	bits=8;
-	flag=0xff;
-	restch=0;
+	int i,bitcount=0;
+	unsigned int test;
 	while(1)
 	{
-		ch=write_buf[count];
-		if(ch==1){
-			bits--;
-			ch=write_buf[count+1];		
-			testch=(1<<bits)|(ch>>(8-bits))|(restch<<(8-bits));
-			restch=ch&(flag>>bits);
-			buffer[outc++]=testch;
-			count+=2;
-			if(bits==0) bits=8;
+		test=write_buf[read_count++];
+		if(test==1){
+			bitpool[bitcount++]=test;
+			test=write_buf[read_count++];
+			for(i=0;i<8;i++)
+				bitpool[bitcount++]=(test>>(7-i))&0x1;
+			if(bitcount%8==0) return bitcount;
 		}
-		else if(ch==0){
-			bits--;
-			ch=write_buf[count+1];
-			testch=(ch>>(8-bits))|(restch<<(8-bits))&((1<<bits)^0xff);
-			buffer[outc++]=testch;
-			restch=ch&(flag>>bits);
-			if(bits==0) bits=8;
-			
-			ch=write_buf[count+2];
-			//printf("bits:%x,ch:%x,restch:%x",bits,ch,restch);getch();
-			if(bits>=4){
-				testch=(ch<<(bits-4))|(restch<<(bits));
-				bits--;
-				if(write_buf[count+3]==1) testch|=(1<<(bits-4));
-				buffer[outc++]=testch;
-				bits-=3;
-				restch=0;
-			}
-			else{
-				testch=(ch>>(4-bits))|(restch<<(bits));
-				buffer[outc++]=testch;
-				restch=ch&(flag>>bits);
-			}
-			count+=3;
-			if(bits==0) bits=8;
+		else if(test==0){
+			bitpool[bitcount++]=test;
+			test=write_buf[read_count++];
+			for(i=0;i<8;i++)
+				bitpool[bitcount++]=(test>>(7-i))&0x1;
+			test=write_buf[read_count++];
+			for(i=0;i<4;i++)
+				bitpool[bitcount++]=(test>>(3-i))&0x1;
+			if(bitcount%8==0) return bitcount;
 		}
-		else break;
-		//printf("last:%02x,%02x;",lastch,testch);getch();
+		else{
+			bitpool[bitcount]=test;
+			return bitcount;
+		}
 	}
-	buffer[outc++]=0;
-	buffer[outc++]=0;
-	fwrite(buffer,1,outc,outfile);
+}
+
+void Encode( FILE *infile, FILE *outfile )
+{
+	int bc;
+	int i,j,k,ch;
+	while(1){
+		bc=ResolveByte();
+		for(i=0;i<bc;i+=8){
+			ch=0;
+			for(j=0;j<8;j++)
+				ch|=(bitpool[i+j]<<(7-j));
+			fputc(ch,outfile);
+		}
+		if(bc%8!=0){
+			ch=0;
+			for(j=0;j<8;j++){
+				if((i+j)<bc)
+					ch|=(bitpool[i+j]<<(7-j));
+			}
+			fputc(ch,outfile);
+			break;
+		}
+	}
+	fputc(0,outfile);fputc(0,outfile);
 }
 
 int main()
@@ -202,7 +205,7 @@ int main()
 	out=fopen(outname,"wb");
 	
 	CacheLZEncode(in,out);
-	ConvertEncode(in,out);
+	Encode(in,out);
 	
 	fclose(in);fclose(out);
 	return 0;

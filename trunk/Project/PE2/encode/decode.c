@@ -41,7 +41,7 @@ void Decode(FILE *fp, int offset, FILE *out)
 			bits-=bitmask;
 			ch=(ch<<bitmask)|(((flag^0xff)&data)>>bits);
 		}
-		printf("%02X,",ch);getch();
+		//printf("%02X,",ch);getch();
 		if((int)testch>0){		//raw byte
 			buffer[buf_ptr++]=ch;
 			buf_ptr&=0xff;
@@ -67,7 +67,7 @@ void Decode(FILE *fp, int offset, FILE *out)
 			flag>>=bitmask;
 			bits-=bitmask;
 			nextch=nextch&(flag^0xff);
-			printf("len:%02x,",win_len);
+			//printf("len:%02x,",win_len);
 			win_len=(win_len<<bitmask)|(nextch>>bits);
 			win_len++;
 			win_pos=ch&0xff;
