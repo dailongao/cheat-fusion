@@ -7,7 +7,7 @@
 #include <deque>
 using namespace std;
 
-#define LOOKAHEAD 0
+#define LOOKAHEAD 1
 
 typedef struct
 {
@@ -18,6 +18,7 @@ typedef struct
 } lz_find;
 
 const int encoded_size[]={1,2,2,3,4,2,3,4,2,2,3,4,2,2,1};
+const int methodlist[]={0xfe,0xfd,0xfc,0xf0,0xf1,0xf3,0xf4,0,0,0,0,0,0,0,0,0,0,0};
 
 unsigned char buffer[0x200000];
 int buf_ptr;
@@ -52,7 +53,7 @@ static void Find_LZ( int start, unsigned char byte, int &length, int &pos , int 
 	for( int lcv = 0; lcv < table[ byte ].size(); lcv++ ) {
 		int match_length = 0;
 		int ptr = table[ byte ][ lcv ];
-
+		int base = ptr;
 		// invalid string; stop scanning
 		if( ptr >= start )
 			break;
@@ -71,7 +72,7 @@ static void Find_LZ( int start, unsigned char byte, int &length, int &pos , int 
 			ptr++;
 			match_length++;
 		}
-
+		//if(match_length>=3 && method==0xfe){printf("start:%x,ptr:%x,len:%x,long:%x,",start,table[ byte ][ lcv ],match_length,longest_length);getch();}
 		// record new long find
 		if( longest_length <= match_length ) {
 			longest_ptr = table[ byte ][ lcv ];
@@ -91,8 +92,9 @@ static int Check( int start, unsigned char byte, int &length, int &pos )
 	int run,gain=0;
 	unsigned char ch,ch1,ch2,ch3;
 	
-	for(int i=0xf0;i<0xff;i++){
+	for(int k=0;k<15;k++){
 		match_length=0;
+		int i=methodlist[k];
 		switch(i)
 		{
 			case 0xf0:
@@ -167,8 +169,8 @@ static int Check( int start, unsigned char byte, int &length, int &pos )
 					}
 					match_length=run*3;
 					
-					if(match_length>=min_match*3 && match_length-encoded_size[i-0xf0]>=gain){
-						gain=match_length-encoded_size[i-0xf0];
+					if(match_length>=min_match*3 && match_length-run-encoded_size[i-0xf0]>=gain){
+						gain=match_length-run-encoded_size[i-0xf0];
 						long_pos=match_pos;
 						long_length=match_length;
 						long_method=i;
@@ -188,15 +190,15 @@ static int Check( int start, unsigned char byte, int &length, int &pos )
 					}
 					match_length=run*2;
 					
-					if(match_length>=min_match*2 && match_length-run-encoded_size[i-0xf0]>=gain){
-						gain=match_length-run-encoded_size[i-0xf0];
+					if(match_length>=min_match*2 && match_length-run*2-encoded_size[i-0xf0]>=gain){
+						gain=match_length-run*2-encoded_size[i-0xf0];
 						long_pos=match_pos;
 						long_length=match_length;
 						long_method=i;
 					}
 				}
 				break;
-				
+
 			case 0xf7:
 				min_match=0x2;
 				if(start+1<size && start+2<size){
@@ -211,15 +213,14 @@ static int Check( int start, unsigned char byte, int &length, int &pos )
 					}
 					match_length=run*4;
 					
-					if(match_length>=min_match*4 && match_length-run-encoded_size[i-0xf0]>=gain){
-						gain=match_length-run-encoded_size[i-0xf0];
+					if(match_length>=min_match*4 && match_length-run*2-encoded_size[i-0xf0]>=gain){
+						gain=match_length-run*2-encoded_size[i-0xf0];
 						long_pos=match_pos;
 						long_length=match_length;
 						long_method=i;
 					}
 				}
 				break;
-
 			case 0xfc:			//fc
 				min_match = 0x4;
 				max_match = 0x0f + min_match;
@@ -260,6 +261,7 @@ static int Check( int start, unsigned char byte, int &length, int &pos )
 				break;
 		}
 	}
+	
 	length = long_length;
 	pos = long_pos;
 	return long_method;
@@ -335,7 +337,7 @@ void LZ_Encode(FILE *in, FILE *out)
 				break;
 		}
 		if( length >= min_match ) {
-	//printf("start:%X,method:%X,",start,method);getch();
+	//if(method==0xfe && (start-pos)%8!=0){printf("start:%x,len:%x,pos:%x,",start,length,pos);getch();}
 			// Found substring match; record and re-do
 			lz.pos = start;
 			lz.ptr = start-pos;
