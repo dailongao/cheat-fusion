@@ -17,7 +17,7 @@ typedef struct
 	int method;
 } lz_find;
 
-const int lz_encoded_size[]={2,2,1};
+const int encoded_size[]={1,2,2,3,4,2,3,4,2,2,3,4,2,2,1};
 
 unsigned char buffer[0x200000];
 int buf_ptr;
@@ -60,7 +60,7 @@ static void Find_LZ( int start, unsigned char byte, int &length, int &pos , int 
 		// LZ window restriction
 		if( start - ptr > window_size )
 			continue;
-		if(method==0xfe && ((start-ptr)%8)!=0) continue;
+		if(method==0xfe && ((start-ptr)&0x07)!=0) continue;
 		// search for longest identical substring
 		for( int lcv2 = start; ( lcv2 < start + max_match ) && ( lcv2 < size ); lcv2++ ) {
 			// look for a mismatch
@@ -84,34 +84,180 @@ static void Find_LZ( int start, unsigned char byte, int &length, int &pos , int 
 	pos = longest_ptr;
 }
 
-static int CheckLZ( int start, unsigned char byte, int &length, int &pos )
+static int Check( int start, unsigned char byte, int &length, int &pos )
 {
 	int long_method=0,long_pos=0,long_length=0;
-	int match_pos = 0,match_length = 0;
+	int match_pos,match_length;
+	int run,gain=0;
+	unsigned char ch,ch1,ch2,ch3;
 	
-	for(int i=0xfc;i<0xff;i++){
-		switch(i){
+	for(int i=0xf0;i<0xff;i++){
+		match_length=0;
+		switch(i)
+		{
+			case 0xf0:
+				min_match=0x3;
+				ch=buffer[start];
+				if(ch<=0xf){
+					run=1;
+					while(buffer[start+run]==ch){
+						if(start+run>=size) break;
+						run++;
+						if(run>=0xf+min_match) break;
+					}
+					match_length=run;
+				}
+				
+				if(match_length-encoded_size[i-0xf0]>=gain){
+					gain=match_length-encoded_size[i-0xf0];
+					long_pos=match_pos;
+					long_length=match_length;
+					long_method=i;
+				}
+				break;
+			case 0xf1:
+				min_match=0x4;
+				ch=buffer[start];
+				run=1;
+				while(buffer[start+run]==ch){
+					if(start+run>=size) break;
+					run++;
+					if(run>=0xff+min_match) break;
+				}
+				match_length=run;
+				
+				if(match_length-encoded_size[i-0xf0]>=gain){
+					gain=match_length-encoded_size[i-0xf0];
+					long_pos=match_pos;
+					long_length=match_length;
+					long_method=i;
+				}
+				break;
+			case 0xf3:
+				min_match=0x2;
+				if(start+1<size && start+2<size){
+					ch1=buffer[start];
+					ch2=buffer[start+1];
+					run=1;
+					while(ch1==buffer[start+2*run] && ch2==buffer[start+1+2*run]){
+						if(start+run*2>=size) break;
+						run++;
+						if(run>=0xff+min_match) break;
+					}
+					match_length=run*2;
+					if(match_length>=min_match*2 && match_length-encoded_size[i-0xf0]>=gain){
+						gain=match_length-encoded_size[i-0xf0];
+						long_pos=match_pos;
+						long_length=match_length;
+						long_method=i;
+					}					
+				}
+				break;
+			case 0xf4:
+				min_match=0x2;
+				if(start+1<size && start+2<size){
+					ch1=buffer[start];
+					ch2=buffer[start+1];
+					ch3=buffer[start+2];
+					run=1;
+					while(ch1==buffer[start+3*run] && ch2==buffer[start+1+3*run] && ch3==buffer[start+2+3*run]){
+						if(start+run*3>=size) break;
+						run++;
+						if(run>=0xff+min_match) break;
+					}
+					match_length=run*3;
+					
+					if(match_length>=min_match*3 && match_length-encoded_size[i-0xf0]>=gain){
+						gain=match_length-encoded_size[i-0xf0];
+						long_pos=match_pos;
+						long_length=match_length;
+						long_method=i;
+					}
+				}
+				break;
+				
+			case 0xf5:
+				min_match=0x4;
+				if(start+1<size){
+					ch1=buffer[start];
+					run=1;
+					while(ch1==buffer[start+2*run]){
+						if(start+run*2>=size) break;
+						run++;
+						if(run>=0xff+min_match) break;				
+					}
+					match_length=run*2;
+					
+					if(match_length>=min_match*2 && match_length-run-encoded_size[i-0xf0]>=gain){
+						gain=match_length-run-encoded_size[i-0xf0];
+						long_pos=match_pos;
+						long_length=match_length;
+						long_method=i;
+					}
+				}
+				break;
+				
+			case 0xf7:
+				min_match=0x2;
+				if(start+1<size && start+2<size){
+					ch1=buffer[start];
+					ch2=buffer[start+1];
+					ch3=buffer[start+2];
+					run=1;
+					while(ch1==buffer[start+4*run] && ch2==buffer[start+1+4*run] && ch3==buffer[start+2+4*run]){
+						if(start+run*4>=size) break;
+						run++;
+						if(run>=0xff+min_match) break;				
+					}
+					match_length=run*4;
+					
+					if(match_length>=min_match*4 && match_length-run-encoded_size[i-0xf0]>=gain){
+						gain=match_length-run-encoded_size[i-0xf0];
+						long_pos=match_pos;
+						long_length=match_length;
+						long_method=i;
+					}
+				}
+				break;
+
 			case 0xfc:			//fc
 				min_match = 0x4;
 				max_match = 0x0f + min_match;
 				window_size = 0xfff;
+				Find_LZ( start, byte, match_length, match_pos, i );
+				if(match_length-encoded_size[i-0xf0]>=gain){
+					gain=match_length-encoded_size[i-0xf0];
+					long_pos=match_pos;
+					long_length=match_length;
+					long_method=i;
+				}
 				break;
 			case 0xfd:			//fd
 				min_match = 0x14;
 				max_match = 0xff + min_match;
 				window_size = 0xff;
+				Find_LZ( start, byte, match_length, match_pos, i );
+				if(match_length-encoded_size[i-0xf0]>=gain){
+					gain=match_length-encoded_size[i-0xf0];
+					long_pos=match_pos;
+					long_length=match_length;
+					long_method=i;
+				}
 				break;
 			case 0xfe:		//fe			//pos must %8==0 (0~120)
 				min_match = 0x3;
 				max_match = 0x0f + min_match;
 				window_size = 0x7f;
+				Find_LZ( start, byte, match_length, match_pos, i );
+				if(match_length-encoded_size[i-0xf0]>=gain){
+					gain=match_length-encoded_size[i-0xf0];
+					long_pos=match_pos;
+					long_length=match_length;
+					long_method=i;
+				}
 				break;
-		}
-		Find_LZ( start, byte, match_length, match_pos, i );
-		if(match_length>=long_length){
-			long_pos=match_pos;
-			long_length=match_length;
-			long_method=i;
+			default:
+				break;
 		}
 	}
 	length = long_length;
@@ -144,12 +290,12 @@ void LZ_Encode(FILE *in, FILE *out)
 		table[ buffer[ start ] ].push_back( start );
 
 		// Go find the longest substring match (and future ones)
-		method=CheckLZ( start, buffer[ start ], length, pos );
+		method=Check( start, buffer[ start ], length, pos );
 
 		// Slightly increase ratio performance
 		for( lcv = 0; lcv < LOOKAHEAD; lcv++ ) {
 			start++; table[ buffer[ start ] ].push_back( start );
-			CheckLZ( start, buffer[ start ], future_length[ lcv ], future_pos[ lcv ]);
+			Check( start, buffer[ start ], future_length[ lcv ], future_pos[ lcv ]);
 		}
 
 		// Un-do lookahead
@@ -160,6 +306,24 @@ void LZ_Encode(FILE *in, FILE *out)
 		}
 		
 		switch(method){
+			case 0xf0:
+				min_match=0x3;
+				break;
+			case 0xf1:
+				min_match=0x4;
+				break;
+			case 0xf3:
+				min_match=0x2*2;
+				break;
+			case 0xf4:
+				min_match=0x2*3;
+				break;
+			case 0xf5:
+				min_match=0x4*2;
+				break;
+			case 0xf7:
+				min_match=0x2*4;
+				break;
 			case 0xfc:			//fc
 				min_match = 0x4;
 				break;
@@ -186,13 +350,13 @@ void LZ_Encode(FILE *in, FILE *out)
 			// Fast update
 			start += length;
 			
-			encode_bytes += lz_encoded_size[method-0xfc];
+			//encode_bytes += encoded_size[method-0xfc];
 		}
 		else {
 			// No substrings found; try again
 			start++;
 
-			encode_bytes++;
+			//encode_bytes++;
 		}
 	}
 
@@ -221,6 +385,27 @@ void LZ_Commit(FILE *in, FILE *out)
 			fputc(lz.method,out);
 			unsigned int temp;
 			switch(lz.method){
+				case 0xf0:
+					temp=((lz.len-3)|(buffer[start]<<4));
+					fputc(temp,out);
+					break;
+				case 0xf1:
+					fputc(lz.len-4,out);fputc(buffer[start],out);
+					break;
+				case 0xf3:
+					fputc((lz.len/2)-2,out);fputc(buffer[start],out);fputc(buffer[start+1],out);
+					break;
+				case 0xf4:
+					fputc((lz.len/3)-2,out);fputc(buffer[start],out);fputc(buffer[start+1],out);fputc(buffer[start+2],out);
+					break;
+				case 0xf5:
+					fputc((lz.len/2)-4,out);fputc(buffer[start],out);
+					for(temp=0;temp<lz.len/2;temp++) fputc(buffer[start+1+2*temp],out);
+					break;
+				case 0xf7:
+					fputc((lz.len/4)-2,out);fputc(buffer[start],out);fputc(buffer[start+1],out);fputc(buffer[start+2],out);
+					for(temp=0;temp<lz.len/4;temp++) fputc(buffer[start+3+4*temp],out);
+					break;
 				case 0xfc:			//fc
 					temp=((lz.len-4)<<4)|(((lz.ptr-1)&0x0f00)>>8);
 					fputc(lz.ptr-1,out);fputc(temp,out);					
