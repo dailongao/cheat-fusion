@@ -208,8 +208,6 @@ void LZ_Commit(FILE *in, FILE *out)
 	int start=0;
 	int rawbytes=0;
 	
-	fputc(0x01,out);
-	
 	while(start<size){
 		lz = lz_table[ lz_ptr ];
 		if( lz.pos == start ) {
@@ -224,21 +222,20 @@ void LZ_Commit(FILE *in, FILE *out)
 			unsigned int temp;
 			switch(lz.method){
 				case 0xfc:			//fc
-					temp=((lz.len-4)<<4)|((lz.ptr&0x0f00)>>8);
-					fputc(lz.ptr,out);fputc(temp,out);					
+					temp=((lz.len-4)<<4)|(((lz.ptr-1)&0x0f00)>>8);
+					fputc(lz.ptr-1,out);fputc(temp,out);					
 					break;
 				case 0xfd:			//fd
-					fputc(lz.ptr,out);fputc(lz.len-0x14,out);
+					fputc(lz.ptr-1,out);fputc(lz.len-0x14,out);
 					break;
 				case 0xfe:		//fe			//pos must %8==0 (0~120)
-					temp=(lz.len-3)|(lz.ptr<<1);
+					temp=(lz.len-3)|((lz.ptr-8)<<1);
 					fputc(temp,out);
 					break;
 			}
 			
 			start += lz.len;
 			lz_ptr++;
-			rawbytes=0;
 		}
 		else {
 			// Free byte
@@ -256,7 +253,6 @@ void LZ_Commit(FILE *in, FILE *out)
 		fwrite(out_buffer,1,rawbytes,out);
 		rawbytes=0;
 	}
-	fputc(0xff,out);
 }
 
 int main()
@@ -266,13 +262,13 @@ int main()
 	char outname[128];
 	printf("input infile\n");
 	scanf("%s",name);
-	sprintf(outname,"%s.cpr",name);
+	sprintf(outname,"%s.cpc",name);
 	in=fopen(name,"rb");
 	out=fopen(outname,"wb");
-	
+	fputc(0x01,out);	
 	LZ_Encode(in,out);
 	LZ_Commit(in,out);
-	
+	fputc(0xff,out);	
 	fclose(in);fclose(out);
 	return 0;
 }
