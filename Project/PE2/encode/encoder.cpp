@@ -163,7 +163,7 @@ int ResolveByte()
 			if(bitcount%8==0) return bitcount;
 		}
 		else{
-			bitpool[bitcount]=test;
+			bitpool[bitcount++]=0;
 			return bitcount;
 		}
 	}
@@ -175,14 +175,17 @@ void Encode( FILE *infile, FILE *outfile )
 	int i,j,k,ch;
 	while(1){
 		bc=ResolveByte();
-		for(i=0;i<bc;i+=8){
-			ch=0;
-			for(j=0;j<8;j++)
-				ch|=(bitpool[i+j]<<(7-j));
-			fputc(ch,outfile);
+		if(bc%8==0){
+			for(i=0;i<bc;i+=8){
+				ch=0;
+				for(j=0;j<8;j++)
+					ch|=(bitpool[i+j]<<(7-j));
+				fputc(ch,outfile);
+			}
 		}
-		if(bc%8!=0){
+		else{
 			ch=0;
+			i=bc&7;
 			for(j=0;j<8;j++){
 				if((i+j)<bc)
 					ch|=(bitpool[i+j]<<(7-j));
