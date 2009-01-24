@@ -260,7 +260,7 @@ static int Check( int start, unsigned char byte, int &length, int &pos )
 						if(run>=0xff+min_match) break;	
 					}
 					match_length=run;
-					if(match_length>=min_match && match_length-encoded_size[i-0xf0]>gain){
+					if(match_length>=min_match && match_length-encoded_size[i-0xf0]>=gain){
 						gain=match_length-encoded_size[i-0xf0];
 						long_pos=match_pos;
 						long_length=match_length;
@@ -279,7 +279,7 @@ static int Check( int start, unsigned char byte, int &length, int &pos )
 						if(run>=0xff+min_match) break;	
 					}
 					match_length=run;
-					if(match_length>=min_match && match_length-encoded_size[i-0xf0]>gain){
+					if(match_length>=min_match && match_length-encoded_size[i-0xf0]>=gain){
 						gain=match_length-encoded_size[i-0xf0];
 						long_pos=match_pos;
 						long_length=match_length;
@@ -369,10 +369,13 @@ void LZ_Encode(FILE *in, FILE *out)
 		// Un-do lookahead
 		for( lcv = LOOKAHEAD; lcv > 0; lcv-- ) {
 			table[ buffer[ start ] ].pop_back(); start--;
-			if(future_method[lcv-1]==0xf8 || future_method[lcv-1]==0xf9 ||
-				future_method[lcv-1]==0xf1 || future_method[lcv-1]==0xf0 ||
+			if(	future_method[lcv-1]==0xf0 ||
 				future_method[lcv-1]==0xfc || future_method[lcv-1]==0xfe || future_method[lcv-1]==0xfd){
 				if( future_length[ lcv-1 ] - length >= lcv ) length = 0;
+			}
+			if(future_method[lcv-1]==0xf1 || future_method[lcv-1]==0xf2 || 
+			future_method[lcv-1]==0xf8 || future_method[lcv-1]==0xf9){
+				if( future_length[ lcv-1 ] - length > lcv ) length = 0;
 			}
 		}
 		
