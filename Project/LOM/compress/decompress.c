@@ -233,7 +233,8 @@ int main(void)
 				temp=(buffer[0]&0xf0)>>1;
 				currentpos=out_ptr;
 				pos=currentpos-temp-8;		//偏移为7bits---128bytes(8的整数倍)
-				//printf("0xfe:%x,%x,%d>",currentpos,temp,count);
+				//if((pos%8)!=0)
+				//{printf("%x,0xfe:%x,%x,%d>",ftell(in),currentpos,temp,count);getch();}
 				while(count--){
 					temp=buf[pos++];
 					//printf("%x:%x|",pos-1,temp);getch();
