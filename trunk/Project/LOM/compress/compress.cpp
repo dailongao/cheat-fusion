@@ -18,7 +18,7 @@ typedef struct
 } lz_find;
 
 const int encoded_size[]={1,2,2,3,4,2,3,4,2,2,3,4,2,2,1};
-const int methodlist[]={0xfe,0xfd,0xfc,0xf0,0xf1,0xf3,0xf4,0,0,0,0,0,0,0,0,0,0,0};
+const int methodlist[]={0xfe,0xfd,0xfc,0xf0,0xf1,0xf3,0xf4,0xf5,0xf7,0,0,0,0,0,0,0,0,0};
 
 unsigned char buffer[0x200000];
 int buf_ptr;
@@ -128,7 +128,7 @@ static int Check( int start, unsigned char byte, int &length, int &pos )
 				}
 				match_length=run;
 				
-				if(match_length-encoded_size[i-0xf0]>=gain){
+				if(match_length-encoded_size[i-0xf0]>gain){
 					gain=match_length-encoded_size[i-0xf0];
 					long_pos=match_pos;
 					long_length=match_length;
@@ -147,7 +147,7 @@ static int Check( int start, unsigned char byte, int &length, int &pos )
 						if(run>=0xff+min_match) break;
 					}
 					match_length=run*2;
-					if(match_length>=min_match*2 && match_length-encoded_size[i-0xf0]>=gain){
+					if(match_length>=min_match*2 && match_length-encoded_size[i-0xf0]>gain){
 						gain=match_length-encoded_size[i-0xf0];
 						long_pos=match_pos;
 						long_length=match_length;
@@ -156,6 +156,7 @@ static int Check( int start, unsigned char byte, int &length, int &pos )
 				}
 				break;
 			case 0xf4:
+			if(gain<=1 || (long_method>=0xf4 && long_method<=0xf7)){
 				min_match=0x2;
 				if(start+1<size && start+2<size){
 					ch1=buffer[start];
@@ -169,16 +170,18 @@ static int Check( int start, unsigned char byte, int &length, int &pos )
 					}
 					match_length=run*3;
 					
-					if(match_length>=min_match*3 && match_length-run-encoded_size[i-0xf0]>=gain){
+					if(match_length>=min_match*3 && match_length-run-encoded_size[i-0xf0]>gain){
 						gain=match_length-run-encoded_size[i-0xf0];
 						long_pos=match_pos;
 						long_length=match_length;
 						long_method=i;
 					}
 				}
+			}
 				break;
 				
 			case 0xf5:
+			if(gain<=1 || (long_method>=0xf4 && long_method<=0xf7)){
 				min_match=0x4;
 				if(start+1<size){
 					ch1=buffer[start];
@@ -190,16 +193,18 @@ static int Check( int start, unsigned char byte, int &length, int &pos )
 					}
 					match_length=run*2;
 					
-					if(match_length>=min_match*2 && match_length-run*2-encoded_size[i-0xf0]>=gain){
-						gain=match_length-run*2-encoded_size[i-0xf0];
+					if(match_length>=min_match*2 && match_length-run-encoded_size[i-0xf0]>gain){
+						gain=match_length-run-encoded_size[i-0xf0];
 						long_pos=match_pos;
 						long_length=match_length;
 						long_method=i;
 					}
 				}
+			}
 				break;
 
 			case 0xf7:
+			if(gain<=1 || (long_method>=0xf4 && long_method<=0xf7)){
 				min_match=0x2;
 				if(start+1<size && start+2<size){
 					ch1=buffer[start];
@@ -213,13 +218,14 @@ static int Check( int start, unsigned char byte, int &length, int &pos )
 					}
 					match_length=run*4;
 					
-					if(match_length>=min_match*4 && match_length-run*2-encoded_size[i-0xf0]>=gain){
-						gain=match_length-run*2-encoded_size[i-0xf0];
+					if(match_length>=min_match*4 && match_length-run-encoded_size[i-0xf0]>gain){
+						gain=match_length-run-encoded_size[i-0xf0];
 						long_pos=match_pos;
 						long_length=match_length;
 						long_method=i;
 					}
 				}
+			}
 				break;
 			case 0xfc:			//fc
 				min_match = 0x4;
@@ -283,7 +289,7 @@ void LZ_Encode(FILE *in, FILE *out)
 	while( start < size ){
 		int future_length[10];
 		int future_pos[10];
-		
+		int future_method[10];
 		int length;
 		int pos;
 		int method;
@@ -297,14 +303,15 @@ void LZ_Encode(FILE *in, FILE *out)
 		// Slightly increase ratio performance
 		for( lcv = 0; lcv < LOOKAHEAD; lcv++ ) {
 			start++; table[ buffer[ start ] ].push_back( start );
-			Check( start, buffer[ start ], future_length[ lcv ], future_pos[ lcv ]);
+			future_method[lcv]=Check( start, buffer[ start ], future_length[ lcv ], future_pos[ lcv ]);
 		}
 
 		// Un-do lookahead
 		for( lcv = LOOKAHEAD; lcv > 0; lcv-- ) {
 			table[ buffer[ start ] ].pop_back(); start--;
-			if( future_length[ lcv-1 ] - length >= lcv )
-				length = 0;
+			if(future_method[lcv-1]==0xf1 || future_method[lcv-1]==0xf0 || future_method[lcv-1]==0xfc || future_method[lcv-1]==0xfe || future_method[lcv-1]==0xfd){
+				if( future_length[ lcv-1 ] - length >= lcv ) length = 0;
+			}
 		}
 		
 		switch(method){
