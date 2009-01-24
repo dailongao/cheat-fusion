@@ -18,7 +18,7 @@ typedef struct
 } lz_find;
 
 const int encoded_size[]={1,2,2,3,4,2,3,4,2,2,3,4,2,2,1};
-const int methodlist[]={0xfe,0xfd,0xfc,0xf0,0xf1,0xf3,0xf4,0xf5,0xf7,0,0,0,0,0,0,0,0,0};
+const int methodlist[]={0xfe,0xfd,0xfc,0xf0,0xf1,0xf2,0xf8,0xf9,0xf3,0xf4,0xf5,0xf7,0,0,0,0,0,0,0,0,0,0,0,0};
 
 unsigned char buffer[0x200000];
 int buf_ptr;
@@ -103,7 +103,7 @@ static int Check( int start, unsigned char byte, int &length, int &pos )
 				if(ch<=0xf){
 					run=1;
 					while(buffer[start+run]==ch){
-						if(start+run>=size) break;
+						if(start+run+1>=size) break;
 						run++;
 						if(run>=0xf+min_match) break;
 					}
@@ -122,7 +122,7 @@ static int Check( int start, unsigned char byte, int &length, int &pos )
 				ch=buffer[start];
 				run=1;
 				while(buffer[start+run]==ch){
-					if(start+run>=size) break;
+					if(start+run+1>=size) break;
 					run++;
 					if(run>=0xff+min_match) break;
 				}
@@ -135,14 +135,36 @@ static int Check( int start, unsigned char byte, int &length, int &pos )
 					long_method=i;
 				}
 				break;
+			case 0xf2:
+				min_match=0x2;
+				if(start+1<size){
+					ch1=buffer[start];
+					ch2=buffer[start+1];
+					if(ch1<=0xf && ch2<=0xf){
+						run=1;
+						while(ch1==buffer[start+2*run] && ch2==buffer[start+1+2*run]){
+							if(start+(run+1)*2>=size) break;
+							run++;
+							if(run>=0xff+min_match) break;
+						}
+						match_length=run*2;
+						if(match_length>=min_match*2 && match_length-encoded_size[i-0xf0]>gain){
+							gain=match_length-encoded_size[i-0xf0];
+							long_pos=match_pos;
+							long_length=match_length;
+							long_method=i;
+						}
+					}
+				}
+				break;
 			case 0xf3:
 				min_match=0x2;
-				if(start+1<size && start+2<size){
+				if(start+1<size){
 					ch1=buffer[start];
 					ch2=buffer[start+1];
 					run=1;
 					while(ch1==buffer[start+2*run] && ch2==buffer[start+1+2*run]){
-						if(start+run*2>=size) break;
+						if(start+(run+1)*2>=size) break;
 						run++;
 						if(run>=0xff+min_match) break;
 					}
@@ -164,7 +186,7 @@ static int Check( int start, unsigned char byte, int &length, int &pos )
 					ch3=buffer[start+2];
 					run=1;
 					while(ch1==buffer[start+3*run] && ch2==buffer[start+1+3*run] && ch3==buffer[start+2+3*run]){
-						if(start+run*3>=size) break;
+						if(start+(run+1)*3>=size) break;
 						run++;
 						if(run>=0xff+min_match) break;
 					}
@@ -187,7 +209,7 @@ static int Check( int start, unsigned char byte, int &length, int &pos )
 					ch1=buffer[start];
 					run=1;
 					while(ch1==buffer[start+2*run]){
-						if(start+run*2>=size) break;
+						if(start+(run+1)*2>=size) break;
 						run++;
 						if(run>=0xff+min_match) break;				
 					}
@@ -212,7 +234,7 @@ static int Check( int start, unsigned char byte, int &length, int &pos )
 					ch3=buffer[start+2];
 					run=1;
 					while(ch1==buffer[start+4*run] && ch2==buffer[start+1+4*run] && ch3==buffer[start+2+4*run]){
-						if(start+run*4>=size) break;
+						if(start+(run+1)*4>=size) break;
 						run++;
 						if(run>=0xff+min_match) break;				
 					}
@@ -226,6 +248,44 @@ static int Check( int start, unsigned char byte, int &length, int &pos )
 					}
 				}
 			}
+				break;
+			case 0xf8:
+				min_match=0x4;
+				if(start+1<size){
+					ch=buffer[start];
+					run=1;
+					while(buffer[start+run]-buffer[start+run-1]==1){
+						if(start+run+1>=size) break;
+						run++;
+						if(run>=0xff+min_match) break;	
+					}
+					match_length=run;
+					if(match_length>=min_match && match_length-encoded_size[i-0xf0]>gain){
+						gain=match_length-encoded_size[i-0xf0];
+						long_pos=match_pos;
+						long_length=match_length;
+						long_method=i;
+					}
+				}
+				break;
+			case 0xf9:
+				min_match=0x4;
+				if(start+1<size){
+					ch=buffer[start];
+					run=1;
+					while(buffer[start+run-1]-buffer[start+run]==1){
+						if(start+run+1>=size) break;
+						run++;
+						if(run>=0xff+min_match) break;	
+					}
+					match_length=run;
+					if(match_length>=min_match && match_length-encoded_size[i-0xf0]>gain){
+						gain=match_length-encoded_size[i-0xf0];
+						long_pos=match_pos;
+						long_length=match_length;
+						long_method=i;
+					}
+				}
 				break;
 			case 0xfc:			//fc
 				min_match = 0x4;
@@ -309,7 +369,9 @@ void LZ_Encode(FILE *in, FILE *out)
 		// Un-do lookahead
 		for( lcv = LOOKAHEAD; lcv > 0; lcv-- ) {
 			table[ buffer[ start ] ].pop_back(); start--;
-			if(future_method[lcv-1]==0xf1 || future_method[lcv-1]==0xf0 || future_method[lcv-1]==0xfc || future_method[lcv-1]==0xfe || future_method[lcv-1]==0xfd){
+			if(future_method[lcv-1]==0xf8 || future_method[lcv-1]==0xf9 ||
+				future_method[lcv-1]==0xf1 || future_method[lcv-1]==0xf0 ||
+				future_method[lcv-1]==0xfc || future_method[lcv-1]==0xfe || future_method[lcv-1]==0xfd){
 				if( future_length[ lcv-1 ] - length >= lcv ) length = 0;
 			}
 		}
@@ -320,6 +382,9 @@ void LZ_Encode(FILE *in, FILE *out)
 				break;
 			case 0xf1:
 				min_match=0x4;
+				break;
+			case 0xf2:
+				min_match=0x2*2;
 				break;
 			case 0xf3:
 				min_match=0x2*2;
@@ -332,6 +397,12 @@ void LZ_Encode(FILE *in, FILE *out)
 				break;
 			case 0xf7:
 				min_match=0x2*4;
+				break;
+			case 0xf8:
+				min_match=0x4;
+				break;
+			case 0xf9:
+				min_match=0x4;
 				break;
 			case 0xfc:			//fc
 				min_match = 0x4;
@@ -401,6 +472,10 @@ void LZ_Commit(FILE *in, FILE *out)
 				case 0xf1:
 					fputc(lz.len-4,out);fputc(buffer[start],out);
 					break;
+				case 0xf2:
+					temp=(buffer[start]|(buffer[start+1]<<4));
+					fputc((lz.len/2)-2,out);fputc(temp,out);
+					break;
 				case 0xf3:
 					fputc((lz.len/2)-2,out);fputc(buffer[start],out);fputc(buffer[start+1],out);
 					break;
@@ -414,6 +489,12 @@ void LZ_Commit(FILE *in, FILE *out)
 				case 0xf7:
 					fputc((lz.len/4)-2,out);fputc(buffer[start],out);fputc(buffer[start+1],out);fputc(buffer[start+2],out);
 					for(temp=0;temp<lz.len/4;temp++) fputc(buffer[start+3+4*temp],out);
+					break;
+				case 0xf8:
+					fputc(lz.len-4,out);fputc(buffer[start],out);
+					break;
+				case 0xf9:
+					fputc(lz.len-4,out);fputc(buffer[start],out);
 					break;
 				case 0xfc:			//fc
 					temp=((lz.len-4)<<4)|(((lz.ptr-1)&0x0f00)>>8);
