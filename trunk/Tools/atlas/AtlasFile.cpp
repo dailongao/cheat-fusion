@@ -105,6 +105,7 @@ void AtlasFile::Move(const unsigned int Pos)
 {
 	if(file)
 		fseek(file, Pos, SEEK_SET);
+	MaxScriptPos = -1;
 }
 
 void AtlasFile::SetTable(Table* Tbl)
