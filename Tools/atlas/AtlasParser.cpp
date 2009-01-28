@@ -78,7 +78,10 @@ void AtlasParser::ParseLine(string& line)
 	{
 	case '#': // Atlas command
 		if(line[firstchar+1]=='#' && line[firstchar+2]=='#' && line[firstchar+3]=='#'){
-			editline = line.substr( line.find('<',0)+1, line.find('>',0)-line.find('<',0) );
+			if(line.find('<',0)!=string::npos)
+				editline = line.substr( line.find('<',0)+1, line.find('>',0)-line.find('<',0) );
+			else
+				return;
 		}//agemo格式文本命令支持,#### 243<#WRITE(MyPtr,$506)> ####
 
 		if(CurBlock.TextLines.empty()) // No text, build more commands
