@@ -16,6 +16,7 @@ Public g_len_c As String
 Public g_len_u As String
 
 Public g_hide_repeat As Boolean
+Public g_hide_complete As Boolean
 
 Public Type SCRIPTINFO
     'data
