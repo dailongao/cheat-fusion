@@ -127,6 +127,20 @@ int output(FILE *fp) {
 			number=0x1701;
 			fprintf(fp,"1700=£«\n");
 		}
+		if(number==0x1d00){
+			number=0x1d0b;
+			fprintf(fp,"1D00=£°\n");
+			fprintf(fp,"1D01=£±\n");
+			fprintf(fp,"1D02=£²\n");
+			fprintf(fp,"1D03=£³\n");
+			fprintf(fp,"1D04=£´\n");
+			fprintf(fp,"1D05=£µ\n");
+			fprintf(fp,"1D06=£¶\n");
+			fprintf(fp,"1D07=£·\n");
+			fprintf(fp,"1D08=£¸\n");
+			fprintf(fp,"1D09=£¹\n");
+			fprintf(fp,"1D0A=£¥\n");
+		}
 	}
 	//×Ö¿â±àÂëÎ´µ½1F59,²¹
 	while(number<0x1f59){
