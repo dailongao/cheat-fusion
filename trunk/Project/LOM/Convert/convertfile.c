@@ -65,7 +65,10 @@ int convert_read(char *write_buffer,char * readtxt_buffer, FILE * txt_fp)
 		   }
 		   fgets(readtxt_buffer,990,txt_fp);
 	    }
-		if(strstr(write_buffer,"{end}")==0){
+		if(strstr(write_buffer,"{nullstring}")!=0){
+			strcpy(write_buffer,"{N}{N}");
+		}
+		else if(strstr(write_buffer,"{end}")==0){
 			strcpy(write_buffer,"没翻{end}{N}{N}");
 		}
 //该段文本结束,去掉最后的两个"{N}",并写入 
