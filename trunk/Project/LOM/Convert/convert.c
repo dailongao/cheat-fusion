@@ -123,7 +123,7 @@ for(j=START;j<(END+1);j++) {
 		return 1;
 	}
 	
-	strcpy(filename,"converted_");
+	strcpy(filename,"conv\\converted_");
 	strcat(filename,char_buffer);
 	strcat(filename,".txt");
 	if((convert_fp=fopen(filename,"wt"))==NULL){
