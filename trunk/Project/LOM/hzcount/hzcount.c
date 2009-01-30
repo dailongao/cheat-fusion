@@ -214,7 +214,7 @@ closedir(dir);
 }
 
 //统计剧情文本文字
-	insert("info chars below:");
+	insert("info char below:");
 
 	dir =opendir("..\\convert\\conv\\");
 if(dir!=NULL)
@@ -274,7 +274,6 @@ if(dir!=NULL)
 			fgets(buf,1499,txt_fp);
 		}
 		fclose(txt_fp);
-		dirptr = readdir(dir);
 	}
 	closedir(dir);
 }
@@ -283,13 +282,13 @@ if(dir!=NULL)
 	
 	insert("zukan chars below:");
 
-	dir =opendir("..\\convertzukan\\conv\\");
+	dir =opendir("..\\convertzukan\\txt\\");
 if(dir!=NULL)
 {	
 	while((dirptr=readdir(dir))!=NULL)
 	{
 		if(dirptr->d_name[0]=='.') continue;
-		strcpy(filename,"..\\convertzukan\\conv\\");
+		strcpy(filename,"..\\convertzukan\\txt\\");
 		strcat(filename,dirptr->d_name);
 		if((txt_fp=fopen(filename,"rt"))==NULL){
 			printf("error on open %s!\n",filename);
@@ -341,7 +340,6 @@ if(dir!=NULL)
 			fgets(buf,1499,txt_fp);
 		}
 		fclose(txt_fp);
-		dirptr = readdir(dir);
 	}
 closedir(dir);
 }
@@ -351,7 +349,8 @@ closedir(dir);
 	printf("now counts all.txt\n");
 	insert("all.txt char below");
 	txt_fp=fopen("all.txt","rt");
-if(txt_fp!=NULL){
+if(txt_fp!=NULL)
+{
 	fgets(buf,1499,txt_fp);
 	while(!feof(txt_fp)) {
 		for(i=0;buf[i]!='\0';i++) {
