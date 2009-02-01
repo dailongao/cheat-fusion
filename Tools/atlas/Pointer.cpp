@@ -56,6 +56,7 @@ unsigned int Pointer::GetMachineAddress(unsigned int Address) const
 
 	switch(AddressType)
 	{
+	case LINEAR_BIG:
 	case LINEAR:
 		return Address;
 	case LOROM00:
@@ -198,19 +199,38 @@ unsigned int CustomPointer::GetAddress(const unsigned int Address) const
 {
 	unsigned int Val;
 	Val = (unsigned int) ((__int64)GetMachineAddress(Address) - Offsetting);
-	switch(Size)
-	{
-	case 8:
-		return Val & 0xFF;
-	case 16:
-		return Val & 0xFFFF;
-	case 24:
-		return Val & 0xFFFFFF;
-	case 32:
-		return Val;
-	default:
-		Logger.BugReport(__LINE__, __FILE__, "Bad size in CustomPointer::GetAddress");
-		return -1;
+	
+	if(AddressType==LINEAR_BIG){
+		switch(Size)
+		{
+		case 8:
+			return Val & 0xFF;
+		case 16:
+			return ((Val & 0xFF00)>>8) + ((Val & 0xFF)<<8);
+		case 24:
+			return ((Val & 0xFF0000)>>16) + (Val & 0xFF00) + ((Val & 0xFF)<<16);
+		case 32:
+			return ((Val & 0xFF000000)>>24) + ((Val & 0xFF0000)>>8) + ((Val & 0xFF00)<<8) + ((Val & 0xFF)<<24);
+		default:
+			Logger.BugReport(__LINE__, __FILE__, "Bad size in CustomPointer::GetAddress");
+			return -1;
+		}
+	}
+	else{
+		switch(Size)
+		{
+		case 8:
+			return Val & 0xFF;
+		case 16:
+			return Val & 0xFFFF;
+		case 24:
+			return Val & 0xFFFFFF;
+		case 32:
+			return Val;
+		default:
+			Logger.BugReport(__LINE__, __FILE__, "Bad size in CustomPointer::GetAddress");
+			return -1;
+		}
 	}
 }
 
