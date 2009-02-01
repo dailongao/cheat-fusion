@@ -9,10 +9,11 @@ static const unsigned int LOROM80 = 3;
 static const unsigned int HIROM = 4;
 static const unsigned int GB = 5;
 static const unsigned int GIZMO = 6;
+static const unsigned int LINEAR_BIG = 7;
 
-static const unsigned int AddressTypeCount = 7;
+static const unsigned int AddressTypeCount = 8;
 static const char* AddressTypes[AddressTypeCount] = { "INVALID", "LINEAR", "LOROM00", "LOROM80",
-	"HIROM", "GB", "GIZMO" };
+	"HIROM", "GB", "GIZMO", "LINEAR_BIG" };
 
 class Pointer
 {
