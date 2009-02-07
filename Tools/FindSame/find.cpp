@@ -52,10 +52,10 @@ int main(){
 	struct dirent *p;
 
 	pool=(char*)malloc(20*1024*1024);
-	
+		mkdir("checked\\");
 	time_t start,finish;
 	start=time(NULL);
-	
+
 	dir=opendir(ORGDIR);
 while( (p=readdir(dir))!=NULL )
 {	
