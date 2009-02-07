@@ -157,6 +157,19 @@ Begin VB.Form Form2
          Caption         =   "日－英－中－对比"
       End
    End
+   Begin VB.Menu mnuView 
+      Caption         =   "显示"
+      Begin VB.Menu mnuViewAll 
+         Caption         =   "所有"
+         Checked         =   -1  'True
+      End
+      Begin VB.Menu mnuViewComplete 
+         Caption         =   "已完成"
+      End
+      Begin VB.Menu mnuViewUnfinish 
+         Caption         =   "未完成"
+      End
+   End
    Begin VB.Menu mnuDummy 
       Caption         =   "  "
       Enabled         =   0   'False
@@ -174,6 +187,9 @@ Option Explicit
 
 Private g_SearchStop As Boolean
 Private g_NeedSaveCache As Boolean
+Private g_ViewComplete As Boolean
+Private g_ViewUnfinish As Boolean
+
 
 
 Private Sub Ini_Load()
@@ -181,7 +197,6 @@ Private Sub Ini_Load()
     default_lan = INI_GetValue(g_Dir & "\Editor.ini", "GUI", "language", "0")
     default_format = INI_GetValue(g_Dir & "\Editor.ini", "GUI", "format", "1")
     hide_repeat = INI_GetValue(g_Dir & "\Editor.ini", "GUI", "hide_repeat", "1")
-    hide_complete = INI_GetValue(g_Dir & "\Editor.ini", "GUI", "hide_complete", "1")
     
     g_len_id = INI_GetValue(g_Dir & "\Editor.ini", "PreviewWidth", "ID", "30")
     g_len_j = INI_GetValue(g_Dir & "\Editor.ini", "PreviewWidth", "JP", "300")
@@ -205,7 +220,6 @@ Private Sub Ini_Load()
     g_TextFormat = CLng(default_format)
     
     g_hide_repeat = (hide_repeat = "1")
-    g_hide_complete = (hide_complete = "1")
     
 End Sub
 
@@ -226,13 +240,10 @@ Private Sub Ini_Save()
     
     hide_repeat = "0"
     If g_hide_repeat Then hide_repeat = "1"
-    hide_complete = "0"
-    If g_hide_complete Then hide_complete = "1"
         
     INI_SetValue g_Dir & "\Editor.ini", "GUI", "language", default_lan
     INI_SetValue g_Dir & "\Editor.ini", "GUI", "format", default_format
     INI_SetValue g_Dir & "\Editor.ini", "GUI", "hide_repeat", hide_repeat
-    INI_SetValue g_Dir & "\Editor.ini", "GUI", "hide_complete", hide_complete
     
     INI_SetValue g_Dir & "\Editor.ini", "PreviewWidth", "ID", g_len_id
     INI_SetValue g_Dir & "\Editor.ini", "PreviewWidth", "JP", g_len_j
@@ -469,7 +480,11 @@ Private Sub CommonGrid_Init()
         Grid1.TextMatrix(I, 4) = g_CacheInfo(I).sAuthor
         Grid1.TextMatrix(I, 5) = g_CacheInfo(I).sMemo
         
-        If g_hide_complete And g_CacheInfo(I).nTrans = g_CacheInfo(I).nTotal Then
+        If g_ViewUnfinish And g_CacheInfo(I).nTrans = g_CacheInfo(I).nTotal Then
+            Grid1.RowHeight(I) = 0
+        End If
+        
+        If g_ViewComplete And g_CacheInfo(I).nTrans < g_CacheInfo(I).nTotal Then
             Grid1.RowHeight(I) = 0
         End If
     
@@ -795,3 +810,29 @@ Private Sub mnuSearch_Click()
     Form4.Show
 End Sub
 
+Private Sub mnuViewAll_Click()
+g_ViewComplete = False
+g_ViewUnfinish = False
+mnuViewAll.Checked = True
+mnuViewComplete.Checked = False
+mnuViewUnfinish.Checked = False
+CommonGrid_Init
+End Sub
+
+Private Sub mnuViewComplete_Click()
+g_ViewComplete = True
+g_ViewUnfinish = False
+mnuViewAll.Checked = False
+mnuViewComplete.Checked = True
+mnuViewUnfinish.Checked = False
+CommonGrid_Init
+End Sub
+
+Private Sub mnuViewUnfinish_Click()
+g_ViewComplete = False
+g_ViewUnfinish = True
+mnuViewAll.Checked = False
+mnuViewComplete.Checked = False
+mnuViewUnfinish.Checked = True
+CommonGrid_Init
+End Sub
