@@ -1,32 +1,16 @@
 VERSION 5.00
 Begin VB.Form Form5 
    Caption         =   "Option"
-   ClientHeight    =   4785
+   ClientHeight    =   3960
    ClientLeft      =   60
    ClientTop       =   345
    ClientWidth     =   4320
    Icon            =   "Option.frx":0000
    LinkTopic       =   "Form5"
    MaxButton       =   0   'False
-   ScaleHeight     =   4785
+   ScaleHeight     =   3960
    ScaleWidth      =   4320
    StartUpPosition =   1  '所有者中心
-   Begin VB.Frame Frame4 
-      Caption         =   "主界面下隐藏翻译完的文本"
-      Height          =   735
-      Left            =   240
-      TabIndex        =   14
-      Top             =   1800
-      Width           =   3975
-      Begin VB.CheckBox chkHideComplete 
-         Caption         =   "启用"
-         Height          =   375
-         Left            =   240
-         TabIndex        =   15
-         Top             =   240
-         Width           =   2775
-      End
-   End
    Begin VB.ComboBox cboTextFormat 
       Height          =   315
       Left            =   480
@@ -49,7 +33,7 @@ Begin VB.Form Form5
       Height          =   375
       Left            =   3000
       TabIndex        =   0
-      Top             =   4320
+      Top             =   3480
       Width           =   1215
    End
    Begin VB.Frame Frame1 
@@ -65,7 +49,7 @@ Begin VB.Form Form5
       Height          =   1575
       Left            =   240
       TabIndex        =   4
-      Top             =   2640
+      Top             =   1800
       Width           =   3975
       Begin VB.TextBox Text4 
          Height          =   375
@@ -150,6 +134,7 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
+
 Private Sub cmdOK_Click()
     
     If cboTextFormat.ListIndex = 0 Then
@@ -162,12 +147,6 @@ Private Sub cmdOK_Click()
         g_hide_repeat = True
     Else
         g_hide_repeat = False
-    End If
-    
-    If chkHideComplete.Value = 1 Then
-        g_hide_complete = True
-    Else
-        g_hide_complete = False
     End If
     
     
@@ -201,12 +180,6 @@ Private Sub Form_Load()
         chkHideRepeat.Value = 1
     Else
         chkHideRepeat.Value = 0
-    End If
-    
-    If g_hide_complete Then
-        chkHideComplete.Value = 1
-    Else
-        chkHideComplete.Value = 0
     End If
     
     Text1.Text = g_len_id
