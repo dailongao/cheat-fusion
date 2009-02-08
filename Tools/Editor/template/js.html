@@ -1,0 +1,90 @@
+<input type=hidden name="SELECT_ID" value="">
+
+<!-- EVENT 通知临时变量 -->
+<input type=hidden name="NEXT_ID" value="" >
+
+<script language="Javascript">
+
+function OnClickRow(id)
+{
+	var id_sel_last;
+	var obj;
+	
+	id_sel_last = document.all("SELECT_ID").value;
+	if(id_sel_last != "") 
+	{
+		
+		document.all('TR_'   + id_sel_last).bgColor = "#F6F7EB";
+		document.all('TD_J_' + id_sel_last).bgColor = "#F6F7EB";
+		
+		obj = document.all('PREVIEW_' + id_sel_last);
+		if(obj != null)obj.bgColor = "#F6F7EB";
+		
+		obj = document.all('TD_U_' + id_sel_last);
+		if(obj != null)obj.bgColor = "#F6F7EB";
+
+		obj = document.all('TD_COMPARE_' + id_sel_last);
+		if(obj != null)obj.bgColor = "#F6F7EB";
+	}
+	
+	document.all('TR_'   + id).bgColor = "#CCCC99";
+	document.all('TD_J_' + id).bgColor = "#CCCC99";
+	
+	obj = document.all('PREVIEW_' + id);
+	if(obj != null)obj.bgColor = "#CCCC99";
+	
+	obj = document.all('TD_U_' + id);
+	if(obj != null)obj.bgColor = "#CCCC99";
+
+	obj = document.all('TD_COMPARE_' + id);
+	if(obj != null)obj.bgColor = "#CCCC99";
+	
+	document.all("SELECT_ID").value = id;
+}
+
+function monitor_core()
+{
+	setTimeout("monitor_core()", 100);
+	
+	var next_id;
+	next_id = "" + document.all('NEXT_ID').value;
+	
+
+	if (next_id != "")
+	{
+		var id_sel_last;
+		id_sel_last = document.all("SELECT_ID").value;
+		
+		var obj;
+		for(;;)
+		{ 
+			if(next_id == "+")
+				id_sel_last++;
+			else
+				id_sel_last--;
+			
+			obj = document.all('TR_' + id_sel_last);
+			
+			if(obj == null)	break;
+			
+			if(obj.style.display == "none")continue; 
+			
+			OnClickRow(id_sel_last);
+			
+			//最下跟踪方式
+			//注意，如果出现了scrollbar, 则高度值就不正确了。现在改为在中间跟踪
+			scrollBy(0, obj.getClientRects().item(0).bottom-(document.body.offsetHeight)/2);
+			
+			//最上跟踪方式
+			//scrollBy(0, obj.getClientRects().item(0).top-5);
+
+			break;
+		}
+
+		document.all('NEXT_ID').value = "";
+	}
+}
+
+monitor_core();
+
+</script>

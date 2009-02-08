@@ -1,0 +1,29 @@
+
+<script language="Javascript">
+
+function OnReverse(nMax)
+{
+	var i;
+	
+	for(i=1;i<=nMax;i++)OnClickRow(i);
+}
+
+function OnClickRow(id)
+{
+	var sel;
+	
+	sel = document.all("ID_" + id).value;
+	if (sel == "Y") 
+	{
+		//变为不选状态
+		document.all("TR_" + id).bgColor = "#555555";
+		document.all("ID_" + id).value = "N";
+	}
+	else
+	{
+		//变为选择状态
+		document.all("TR_" + id).bgColor = "#f6f7eb";
+		document.all("ID_" + id).value = "Y";
+	}
+}
+</script>
