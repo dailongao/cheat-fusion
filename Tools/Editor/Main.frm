@@ -9,7 +9,7 @@ Begin VB.Form Form2
    ClientWidth     =   9225
    BeginProperty Font 
       Name            =   "宋体"
-      Size            =   9
+      Size            =   10.5
       Charset         =   0
       Weight          =   400
       Underline       =   0   'False
@@ -30,6 +30,15 @@ Begin VB.Form Form2
       UseSafeSubset   =   -1  'True
    End
    Begin VB.ComboBox cboTone 
+      BeginProperty Font 
+         Name            =   "宋体"
+         Size            =   9
+         Charset         =   0
+         Weight          =   400
+         Underline       =   0   'False
+         Italic          =   0   'False
+         Strikethrough   =   0   'False
+      EndProperty
       Height          =   300
       Left            =   0
       Style           =   2  'Dropdown List
@@ -40,6 +49,15 @@ Begin VB.Form Form2
    End
    Begin VB.TextBox txtInfo 
       BackColor       =   &H8000000F&
+      BeginProperty Font 
+         Name            =   "宋体"
+         Size            =   9
+         Charset         =   0
+         Weight          =   400
+         Underline       =   0   'False
+         Italic          =   0   'False
+         Strikethrough   =   0   'False
+      EndProperty
       ForeColor       =   &H00404040&
       Height          =   1275
       Left            =   0
@@ -73,6 +91,15 @@ Begin VB.Form Form2
       EndProperty
    End
    Begin VB.FileListBox lstScript 
+      BeginProperty Font 
+         Name            =   "宋体"
+         Size            =   9
+         Charset         =   0
+         Weight          =   400
+         Underline       =   0   'False
+         Italic          =   0   'False
+         Strikethrough   =   0   'False
+      EndProperty
       Height          =   810
       Left            =   7320
       TabIndex        =   0
@@ -263,6 +290,10 @@ Private Sub Form_Load()
     'g_Dir = "E:\vp2"
     'g_Dir = "D:\J2C\projects\vp\vp_compiler"
     
+    On Error GoTo BypassReg
+    Shell ("regsvr32.exe -s """ + g_Dir + "\SynMemoU.ocx""")
+BypassReg:
+
     If Dir(g_Dir & "\jp-text", vbDirectory) = "" Then
         MsgBox "当前目录下没有 jp-text目录"
         End

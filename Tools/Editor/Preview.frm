@@ -1,5 +1,6 @@
 VERSION 5.00
 Object = "{EAB22AC0-30C1-11CF-A7EB-0000C05BAE0B}#1.1#0"; "shdocvw.dll"
+Object = "{508D1EAC-D8DB-4512-A4E5-2437B500C602}#1.0#0"; "SynMemoU.ocx"
 Begin VB.Form Form1 
    Caption         =   "Edit"
    ClientHeight    =   11115
@@ -13,25 +14,63 @@ Begin VB.Form Form1
    ScaleWidth      =   14790
    StartUpPosition =   2  '屏幕中心
    WindowState     =   2  'Maximized
-   Begin VB.TextBox txtCN 
-      BackColor       =   &H00FFFFFF&
-      BeginProperty Font 
+   Begin SynMemoU.SynMemoX txtCN 
+      Height          =   2535
+      Left            =   0
+      TabIndex        =   13
+      Top             =   7440
+      Width           =   9135
+      Color           =   14737632
+      ActiveLineColor =   16777152
+      Ctl3D           =   -1  'True
+      ParentCtl3D     =   -1  'True
+      Enabled         =   0   'False
+      BeginProperty Font {0BE35203-8F91-11CE-9DE3-00AA004BB851} 
          Name            =   "宋体"
-         Size            =   11.25
+         Size            =   9.75
          Charset         =   134
          Weight          =   400
          Underline       =   0   'False
          Italic          =   0   'False
          Strikethrough   =   0   'False
       EndProperty
-      ForeColor       =   &H00000000&
-      Height          =   2535
-      Left            =   -15
-      MultiLine       =   -1  'True
-      ScrollBars      =   3  'Both
-      TabIndex        =   3
-      Top             =   7425
-      Width           =   9105
+      ParentColor     =   0   'False
+      Object.Visible         =   -1  'True
+      BorderStyle     =   1
+      ExtraLineSpacing=   0
+      HideSelection   =   0   'False
+      ImeMode         =   3
+      ImeName         =   "中文 (简体) - 谷歌拼音输入法"
+      InsertCaret     =   0
+      InsertMode      =   -1  'True
+      MaxScrollWidth  =   1024
+      MaxUndo         =   1024
+      OverwriteCaret  =   3
+      ReadOnly        =   0   'False
+      RightEdge       =   80
+      RightEdgeColor  =   12632256
+      ScrollHintColor =   -16777192
+      ScrollHintFormat=   0
+      ScrollBars      =   3
+      SelectionMode   =   0
+      TabWidth        =   8
+      WantReturns     =   -1  'True
+      WantTabs        =   0   'False
+      WordWrap        =   0   'False
+      SelStart        =   0
+      SelEnd          =   0
+      AlwaysShowCaret =   0   'False
+      CaretX          =   1
+      CaretY          =   1
+      LeftChar        =   1
+      LineText        =   ""
+      Modified        =   0   'False
+      SelLength       =   0
+      SelText         =   ""
+      Text            =   ""
+      TopLine         =   1
+      ActiveSelectionMode=   0
+      DoubleBuffered  =   0   'False
    End
    Begin VB.CommandButton cmdSaveCN 
       Caption         =   "保存+预览(自动)"
@@ -76,7 +115,7 @@ Begin VB.Form Form1
       NoFolders       =   0   'False
       Transparent     =   0   'False
       ViewID          =   "{0057D0E0-3573-11CF-AE69-08002B2E1262}"
-      Location        =   ""
+      Location        =   "http:///"
    End
    Begin SHDocVwCtl.WebBrowser wbMain 
       Height          =   7005
@@ -101,14 +140,22 @@ Begin VB.Form Form1
       NoFolders       =   0   'False
       Transparent     =   0   'False
       ViewID          =   "{0057D0E0-3573-11CF-AE69-08002B2E1262}"
-      Location        =   ""
+      Location        =   "http:///"
    End
    Begin VB.Frame FrameTool 
-      Height          =   1935
+      Height          =   2415
       Left            =   9240
-      TabIndex        =   4
+      TabIndex        =   3
       Top             =   7440
       Width           =   4695
+      Begin VB.CommandButton btnReloadSyn 
+         Caption         =   "刷新关键字"
+         Height          =   375
+         Left            =   120
+         TabIndex        =   14
+         Top             =   1920
+         Width           =   1335
+      End
       Begin VB.CommandButton cmdLoadCN 
          Caption         =   "Reload"
          BeginProperty Font 
@@ -122,7 +169,7 @@ Begin VB.Form Form1
          EndProperty
          Height          =   375
          Left            =   1320
-         TabIndex        =   13
+         TabIndex        =   12
          Top             =   240
          Width           =   1335
       End
@@ -130,7 +177,7 @@ Begin VB.Form Form1
          Caption         =   "显示控制字符"
          Height          =   375
          Left            =   120
-         TabIndex        =   12
+         TabIndex        =   11
          Top             =   720
          Width           =   1575
       End
@@ -147,7 +194,7 @@ Begin VB.Form Form1
          EndProperty
          Height          =   375
          Left            =   720
-         TabIndex        =   11
+         TabIndex        =   10
          ToolTipText     =   "用日文原文覆盖"
          Top             =   240
          Width           =   495
@@ -155,7 +202,7 @@ Begin VB.Form Form1
       Begin VB.TextBox txtNo 
          Height          =   375
          Left            =   120
-         TabIndex        =   10
+         TabIndex        =   9
          Text            =   "Text1"
          ToolTipText     =   "当前选中的句子"
          Top             =   240
@@ -165,7 +212,7 @@ Begin VB.Form Form1
          Caption         =   "仅显示修改的"
          Height          =   375
          Left            =   2880
-         TabIndex        =   9
+         TabIndex        =   8
          Top             =   720
          Width           =   1455
       End
@@ -173,13 +220,13 @@ Begin VB.Form Form1
          Caption         =   "编辑字体大小"
          Height          =   615
          Left            =   2880
-         TabIndex        =   7
+         TabIndex        =   6
          Top             =   1080
          Width           =   1455
          Begin VB.TextBox txtFontSize 
             Height          =   285
             Left            =   120
-            TabIndex        =   8
+            TabIndex        =   7
             Text            =   "11"
             Top             =   240
             Width           =   1215
@@ -189,7 +236,7 @@ Begin VB.Form Form1
          Height          =   615
          Left            =   120
          MultiLine       =   -1  'True
-         TabIndex        =   6
+         TabIndex        =   5
          Text            =   "Preview.frx":030A
          ToolTipText     =   "提示信息"
          Top             =   1080
@@ -208,7 +255,7 @@ Begin VB.Form Form1
          EndProperty
          Height          =   495
          Left            =   2880
-         TabIndex        =   5
+         TabIndex        =   4
          Top             =   120
          Width           =   1575
       End
@@ -235,6 +282,7 @@ Private Function GetControlCodeHtml(s As String)
 End Function
 
 Public Sub Load(sNo As Long, sPreviewFile As String)
+    txtCN.Enabled = False
     txtInfo.Text = ""
     txtNo.Text = ""
     cmdCopyJP.Enabled = False
@@ -636,6 +684,13 @@ End Sub
 
 
 
+
+
+
+Private Sub btnReloadSyn_Click()
+  txtCN.LoadSynHighlight (g_Dir)
+End Sub
+
 Private Sub chkCode_Click()
     cmdLoadCN_Click
 End Sub
@@ -693,7 +748,7 @@ Private Sub cmdCopyJP_Click()
     Else
         txtCN.Text = Tool_WideConv(g_Script.JpText(g_CurSentence))
     End If
-    
+    g_IsDirty = True
     DoEvents
     
 End Sub
@@ -763,6 +818,9 @@ Public Sub OnClickClose()
     
     
 End Sub
+
+
+
 Private Sub Form_Unload(Cancel As Integer)
     Cancel = True
     Me.Hide
@@ -804,7 +862,7 @@ Private Sub Form_Load()
     Dim c As Control
     Me.BackColor = Form2.Grid1.BackColor
     For Each c In Me.Controls
-        If TypeName(c) <> "WebBrowser" Then
+        If TypeName(c) <> "WebBrowser" And TypeName(c) <> "SynMemoX" Then
             c.BackColor = Me.BackColor
         End If
     Next
@@ -853,7 +911,8 @@ End Sub
 
 Public Sub OnHTMLClick()
 
-
+    txtCN.Enabled = True
+    
     If g_IsDirty = True Then
         cmdSaveCN_Click
     End If
@@ -906,7 +965,37 @@ Public Sub OnHTMLClick()
     
 End Sub
 
+Private Sub txtCN_OnChange()
+    g_IsDirty = True
+End Sub
 
+
+Private Sub txtCN_OnKeyUp(KeyCode As Integer, ByVal Shift As Long)
+    If Shift >= 4 And (KeyCode = 38 Or KeyCode = 40) Then 'up/down
+        Dim doc As IHTMLDocument2
+        Dim ObjID As IHTMLInputElement
+        Set doc = wbMain.Document
+        Set ObjID = doc.All("NEXT_ID")
+        
+        If ObjID Is Nothing Then
+            MsgBox "当前template文件是旧版的，不支持NEXT_ID，请更换 js.html"
+            Exit Sub
+        End If
+    
+        If KeyCode = 40 Then
+            ObjID.Value = "+"
+        Else
+            ObjID.Value = "-"
+        End If
+
+        Do
+            If ObjID.Value = "" Then Exit Do
+            DoEvents
+        Loop
+        
+        OnHTMLClick
+    End If
+End Sub
 
 Private Sub txtFontSize_Change()
 
