@@ -27,7 +27,7 @@ Begin VB.Form Form1
       Enabled         =   0   'False
       BeginProperty Font {0BE35203-8F91-11CE-9DE3-00AA004BB851} 
          Name            =   "ËÎÌו"
-         Size            =   9.75
+         Size            =   11.25
          Charset         =   134
          Weight          =   400
          Underline       =   0   'False
