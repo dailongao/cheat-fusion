@@ -1,0 +1,119 @@
+<html>
+<title>agemo editor</title>
+<LINK href="agemo.css" type=text/css rel=stylesheet>
+<title>Agemo</title>
+
+<body topmargin=0  leftmargin=100>
+<br><center>对话文本编辑工具</center>
+<br><center>说明文档</center>
+<hr>
+<br><font color=red>系统需求</font>
+<br>
+<br>编辑器使用VB6开发，需要IE6。如果程序不能运行，regsvr32一下 MSSTDFMT.DLL
+<br>如果是win98的用户，可能需要安装vb6.0才能运行
+<br>
+<hr>
+<br><font color=red>目录结构</font>
+<br>.\jp-text\　　　放日文文本
+<br>.\us-text\　　　放英文文本
+<br>.\cn-text\　　　放中文文本 （翻译的都在这里）
+<br>.\cn-compare\ 　放对照用的中文文本（比如别人修改了一些东西，你拿来对比）
+<br>.\info\　　　　 放每一段的注释　（在主界面一段文本上点右键可以设定译者、注释）
+<br>.\data\　　　　 内部使用
+<br>.\template\　　 模板
+<br>.\game.vbs　　　游戏控制字符的解释脚本
+<br>.\Editor.ini　　编辑器的配置文件，选项设置会保存在这里。
+<br>
+<hr>
+<br><font color=red>支持的文本格式1 - Agemo用的格式</font>
+
+<table border="1" cellspacing="0" cellpadding="0" bordercolor="#000000" align=center>
+	<tr>
+		<td width=300><br>格式见右侧
+<br>		
+<br>·#### n #### 表示第n句
+<br>·{} 括起来的是控制字符
+<br>·为统一说法，右边全部叫一<b>段</b>，每个编号叫一<b>句</b>
+<br>·这种格式操作代码可以自己写，
+<br>　或者参考编辑器源码的 Script_DecodeText()
+ </td>
+		<td width=400 align=left bgcolor="#F6F7EB"><font color=#000000 style='font-size:9pt'>
+#### 1 ####
+<br>{05:menu}※※　セーブ　※※
+<br>※※　回復　　※※
+<br>※※　ヒント　※※
+<br>※※　やめる　※※
+<br>
+<br>#### 2 ####
+<br>マルナ街道
+<br>
+<br>#### 3 ####
+<br>{0A00C0:color}サルト遺跡{0A00D0:color}へ
+</font>
+	</td>
+	</tr>
+</table>
+<br>
+<hr>
+<br><font color=red>支持的文本格式2 - 地址,长度,文字</font>
+<table border="1" cellspacing="0" cellpadding="0" bordercolor="#000000" align=center>
+	<tr >
+		<td width=300><br>格式见右侧
+<br>		
+<br>本人不用这种格式的，如果你找到了指针表，
+<br>可以方便修改每一句的长度，建议导出我那种格式。
+ </td>
+		<td width=400 align=left bgcolor="#F6F7EB"><font color=#000000 style='font-size:9pt'>
+E9DA,30,底いため、通常攻擊には弱い。{结束符FFFF}
+<br>E57A,14,スキル：なし{结束符FFFF}
+<br>F766,46,この世に怨念を持ったまま死だ者の灵で、
+<br>F766,13,生前の{结束符FFFF}
+</font>
+	</td>
+	</tr>
+</table>
+<br>
+
+<hr>
+<br><font color=red>编辑器选项</font>
+<br>
+<br>在最新的4.0版中，选项里可以设定中文、日文、英文每一列的宽度。
+<br>建议宽度设为游戏对话框一行长度的最大值，也是起到标尺的作用。
+<hr>
+<br><font color=red>预览界面的解释</font>
+<br>注：用键盘换上、下句：CTRL-上箭头   CTRL-下箭头 （在编辑文本框里按键才有效）
+<br><img src=web\1.png>
+<br>
+<hr>
+<br>
+<br>
+<br><font color=red>修改对比模式</font>
+<br>·把别人修改的译文放在 cn-compare 目录下
+<br>·自己的译文在 cn-text 下，编辑器修改也是只改这个目录的。
+<br>·菜单->语言，选择有对比的，就能看到红字标出来的区别
+<br>
+<br>修改后可以立即看到区别。
+<br>如果同一句没有区别，或者cn-compare的此句为空，则对比列不显示。
+<br>一般用于润色。先把文本都备份到cn-compare目录下，然后自己改cn-text。
+<br><img src=web\2.png>
+
+<br>
+<br>
+<br>
+<hr>
+<br><font color=red>游戏控制字符的预览处理 － 编写Game.vbs</font>
+<br>编辑器 4.0 新功能，控制字符预览不再需要修改编辑器源代码，直接改这个外挂脚本即可。
+<br>见例子中的 Game.vbs，就是普通的vbscript脚本文件，编辑器会动态解释执行。
+<br>处理游戏的控制字符实际上是字符串替换一下就行了。
+<br>没必要所有的控制字符都处理，只处理关键的、需要翻译看的控制字符。
+<br>
+<br>有2个函数
+<br>Function PreviewHTML(sText, LanguageId)
+<br>Function PreviewText(sText, LanguageId)
+<br>按例子略加修改即可
+<br>
+<br>game.vbs没有也可以执行，编辑器只是预览时去掉控制字符，没有针对控制字符再作任何处理。
+<br>
+<br>
+</body>
+</html>

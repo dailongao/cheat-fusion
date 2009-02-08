@@ -1,0 +1,77 @@
+<html>
+<meta http-equiv=Content-Type content=text/html; charset=gb2312>
+<STYLE>
+TD {
+	FONT-FAMILY: "宋体,Courier"; 
+	FONT-SIZE: 10pt; 
+	COLOR: #000000;
+}
+
+.JP {
+	FONT-FAMILY: "MS Gothic";
+	FONT-SIZE: 10pt;
+	COLOR: #000000;
+}
+
+.CN {
+	FONT-FAMILY: "宋体";
+	FONT-SIZE: 10pt;
+	COLOR: #000000;
+}
+
+.US {
+	FONT-FAMILY: "Courier New";
+	FONT-SIZE: 10pt;
+	COLOR: #000000;
+	line-height: 11pt;
+}
+
+</STYLE>
+
+<body bgcolor=#F6F7EB topmargin=0 leftmargin=0>
+
+<form>
+黑色的表示未选择的，未选择的不进行替换 <input type=button onclick="OnReverse(TEMPLATE_MAX)" value="反选">
+<!-- TEMPLATE_HIDDEN -->
+</form>
+<table border="0" cellspacing="1" cellpadding="3" bgcolor="#000000">
+	<tr bgcolor="#CCCC99">
+		<td align=center width=WIDTH_ID NOWRAP>编号</td>
+		<td align=center width=WIDTH_JP class="JP" NOWRAP>日文</td>
+		<td align=center width=WIDTH_CN class="CN" NOWRAP>中文</td>
+		<td align=center width=WIDTH_US class="US" NOWRAP>英文</td>
+		</tr>
+	<!-- TEMPLATE_ROWS -->
+</table>
+
+<script language="Javascript">
+
+function OnReverse(nMax)
+{
+	var i;
+	
+	for(i=1;i<=nMax;i++)OnClickRow(i);
+}
+
+function OnClickRow(id)
+{
+	var sel;
+	
+	sel = document.all("ID_" + id).value;
+	if (sel == "Y") 
+	{
+		//变为不选状态
+		document.all("TR_" + id).bgColor = "#555555";
+		document.all("ID_" + id).value = "N";
+	}
+	else
+	{
+		//变为选择状态
+		document.all("TR_" + id).bgColor = "#f6f7eb";
+		document.all("ID_" + id).value = "Y";
+	}
+}
+</script>
+
+
+</html>
