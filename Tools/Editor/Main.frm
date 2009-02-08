@@ -371,7 +371,7 @@ Private Sub Cache_Rebuild(bWordsCalc As Boolean)
     If lstScript.ListCount = 0 Then
         Exit Sub
     End If
-     
+
     ReDim g_CacheInfo(1 To lstScript.ListCount)
     
     
@@ -434,7 +434,7 @@ Private Sub Cache_Rebuild(bWordsCalc As Boolean)
         DoEvents
         
     Next I
-    
+
     Call Cache_Save
     
     Form2.info "日文总计字数" + str(total_words) + ",已翻译" + str(total_trans)
@@ -734,7 +734,7 @@ End Sub
 
 Private Sub mnuRefresh_Click()
     info "refreshing, pls wait"
-    Cache_Rebuild True
+    Cache_Rebuild (True)
     CommonGrid_Init
     EventGrid_Init
     info "done"
