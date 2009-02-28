@@ -40,7 +40,7 @@ Begin VB.Form Form1
       ExtraLineSpacing=   0
       HideSelection   =   0   'False
       ImeMode         =   3
-      ImeName         =   "中文 (简体) - 谷歌拼音输入法"
+      ImeName         =   ""
       InsertCaret     =   0
       InsertMode      =   -1  'True
       MaxScrollWidth  =   1024
@@ -712,6 +712,7 @@ Private Sub cmdAlter_Click()
     End If
 
     txtCN.Text = g_Script.CnTextAlter(g_CurSentence)
+    g_IsDirty = True
     DoEvents
     
 End Sub
