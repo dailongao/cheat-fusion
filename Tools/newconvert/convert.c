@@ -124,7 +124,7 @@ int convert_read(char *write_buffer,char * readtxt_buffer, FILE * txt_fp)
 	    }
 		
 		if(strstr(write_buffer,"{end}")==0){
-			strcpy(write_buffer,"没翻{end}{N}{N}");
+			strcpy(write_buffer,"{end}{N}{N}");
 		}
 /*//该段文本结束,先看看有没有{skip}		
 		if((strstr(write_buffer,"{skip}"))){
