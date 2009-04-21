@@ -17,7 +17,7 @@ Function PreviewHTML(sText, LanguageId)
 
 sText = Replace(sText, "{pause}", "¡ñ" & vbcrlf)
 sText = Replace(sText, "{page}", "¡ö" & vbcrlf)
-	
+sText = Replace(sText, "{Enter}", vbcrlf)	
 	PreviewHTML = sText
 End Function                      
                                   
@@ -29,7 +29,6 @@ End Function
 '----------------------------------------------------
 Function PreviewText(sText, LanguageId)
 	                              
-	sText = Replace(sText, "{pause}", "¡ñ" & vbcrlf)
 	sText = Replace(sText, " ", "~")
 	sText = Replace(sText, "¡¡", "~")
 	                              
