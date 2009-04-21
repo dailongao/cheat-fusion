@@ -812,8 +812,7 @@ Private Sub mnuRepeatSync_Click()
 
                 Repeat_Script = Script_GetInfo(str(0))
                 Repeat_Sentence = Val(str(1))
-                If UBound(Repeat_Script.CnText) >= Repeat_Sentence Then 'And Repeat_Script.CnText(Repeat_Sentence) <> "" Then
-                '原来原文完全未翻译才同步,现在改为强制同步
+                If UBound(Repeat_Script.CnText) >= Repeat_Sentence And Repeat_Script.CnText(Repeat_Sentence) <> "" Then
                     tmp_info.CnText(j) = Repeat_Script.CnText(Repeat_Sentence)
                     bsave = True
                 End If
