@@ -1,15 +1,15 @@
 VERSION 5.00
 Object = "{5E9E78A0-531B-11CF-91F6-C2863C385E30}#1.0#0"; "MSFLXGRD.OCX"
-Object = "{0E59F1D2-1FBE-11D0-8FF2-00A0D10038BC}#1.0#0"; "msscript.ocx"
+Object = "{0E59F1D2-1FBE-11D0-8FF2-00A0D10038BC}#1.0#0"; "MSScript.ocx"
 Begin VB.Form Form2 
    Caption         =   "Script Editor 4.0 (Build 06-07-23)"
-   ClientHeight    =   8400
-   ClientLeft      =   165
-   ClientTop       =   450
-   ClientWidth     =   9225
+   ClientHeight    =   8398
+   ClientLeft      =   169
+   ClientTop       =   455
+   ClientWidth     =   9217
    BeginProperty Font 
       Name            =   "宋体"
-      Size            =   10.5
+      Size            =   10.67
       Charset         =   0
       Weight          =   400
       Underline       =   0   'False
@@ -19,20 +19,20 @@ Begin VB.Form Form2
    Icon            =   "Main.frx":0000
    LinkTopic       =   "Form2"
    MaxButton       =   0   'False
-   ScaleHeight     =   8400
-   ScaleWidth      =   9225
+   ScaleHeight     =   8398
+   ScaleWidth      =   9217
    StartUpPosition =   2  '屏幕中心
    Begin MSScriptControlCtl.ScriptControl Script1 
       Left            =   4080
       Top             =   7800
-      _ExtentX        =   1005
-      _ExtentY        =   1005
+      _ExtentX        =   1011
+      _ExtentY        =   1011
       UseSafeSubset   =   -1  'True
    End
    Begin VB.ComboBox cboTone 
       BeginProperty Font 
          Name            =   "宋体"
-         Size            =   9
+         Size            =   9.34
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -51,7 +51,7 @@ Begin VB.Form Form2
       BackColor       =   &H8000000F&
       BeginProperty Font 
          Name            =   "宋体"
-         Size            =   9
+         Size            =   9.34
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -73,8 +73,8 @@ Begin VB.Form Form2
       TabIndex        =   1
       Top             =   0
       Width           =   9225
-      _ExtentX        =   16272
-      _ExtentY        =   10954
+      _ExtentX        =   16698
+      _ExtentY        =   11242
       _Version        =   393216
       Cols            =   7
       FocusRect       =   0
@@ -82,7 +82,7 @@ Begin VB.Form Form2
       AllowUserResizing=   1
       BeginProperty Font {0BE35203-8F91-11CE-9DE3-00AA004BB851} 
          Name            =   "宋体"
-         Size            =   9
+         Size            =   9.3333
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -93,7 +93,7 @@ Begin VB.Form Form2
    Begin VB.FileListBox lstScript 
       BeginProperty Font 
          Name            =   "宋体"
-         Size            =   9
+         Size            =   9.34
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -113,8 +113,8 @@ Begin VB.Form Form2
       TabIndex        =   3
       Top             =   0
       Width           =   9240
-      _ExtentX        =   16298
-      _ExtentY        =   10954
+      _ExtentX        =   16722
+      _ExtentY        =   11242
       _Version        =   393216
       Cols            =   7
       FocusRect       =   0
@@ -122,7 +122,7 @@ Begin VB.Form Form2
       AllowUserResizing=   1
       BeginProperty Font {0BE35203-8F91-11CE-9DE3-00AA004BB851} 
          Name            =   "宋体"
-         Size            =   9
+         Size            =   9.3333
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -442,7 +442,7 @@ Private Sub Cache_Rebuild(bWordsCalc As Boolean)
 '                Dim tempstr As String
 '                Dim str() As String
 '
-'                tempstr = Left(tmp_info.JpText(j), 20)
+'                tempstr = Left(tmp_info.JpText(j), 40)
 '                tempstr = Mid(tempstr, 2)
 '                str = Split(tempstr, "-")
 '
@@ -806,14 +806,14 @@ Private Sub mnuRepeatSync_Click()
                 Dim tempstr As String
                 Dim str() As String
 
-                tempstr = Left(tmp_info.JpText(j), 20)
+                tempstr = Left(tmp_info.JpText(j), 40)
                 tempstr = Mid(tempstr, 2)
                 str = Split(tempstr, "-")
 
                 Repeat_Script = Script_GetInfo(str(0))
                 Repeat_Sentence = Val(str(1))
-                If UBound(Repeat_Script.CnText) >= Repeat_Sentence And Repeat_Script.CnText(Repeat_Sentence) <> "" Then
-                '原文完全未翻译才同步
+                If UBound(Repeat_Script.CnText) >= Repeat_Sentence Then 'And Repeat_Script.CnText(Repeat_Sentence) <> "" Then
+                '原来原文完全未翻译才同步,现在改为强制同步
                     tmp_info.CnText(j) = Repeat_Script.CnText(Repeat_Sentence)
                     bsave = True
                 End If
