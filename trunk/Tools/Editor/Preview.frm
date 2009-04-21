@@ -4,14 +4,14 @@ Object = "{508D1EAC-D8DB-4512-A4E5-2437B500C602}#1.0#0"; "SynMemoU.ocx"
 Begin VB.Form Form1 
    Caption         =   "Edit"
    ClientHeight    =   11115
-   ClientLeft      =   60
-   ClientTop       =   450
-   ClientWidth     =   14790
+   ClientLeft      =   65
+   ClientTop       =   455
+   ClientWidth     =   14781
    Icon            =   "Preview.frx":0000
    LinkTopic       =   "Form1"
    MinButton       =   0   'False
    ScaleHeight     =   11115
-   ScaleWidth      =   14790
+   ScaleWidth      =   14781
    StartUpPosition =   2  '屏幕中心
    WindowState     =   2  'Maximized
    Begin SynMemoU.SynMemoX txtCN 
@@ -27,7 +27,7 @@ Begin VB.Form Form1
       Enabled         =   0   'False
       BeginProperty Font {0BE35203-8F91-11CE-9DE3-00AA004BB851} 
          Name            =   "宋体"
-         Size            =   11.25
+         Size            =   11.3333
          Charset         =   134
          Weight          =   400
          Underline       =   0   'False
@@ -76,7 +76,7 @@ Begin VB.Form Form1
       Caption         =   "保存+预览(自动)"
       BeginProperty Font 
          Name            =   "宋体"
-         Size            =   9
+         Size            =   9.34
          Charset         =   0
          Weight          =   700
          Underline       =   0   'False
@@ -160,7 +160,7 @@ Begin VB.Form Form1
          Caption         =   "Reload"
          BeginProperty Font 
             Name            =   "MS Sans Serif"
-            Size            =   8.25
+            Size            =   7.33
             Charset         =   0
             Weight          =   700
             Underline       =   0   'False
@@ -185,7 +185,7 @@ Begin VB.Form Form1
          Caption         =   "↓"
          BeginProperty Font 
             Name            =   "MS Sans Serif"
-            Size            =   8.25
+            Size            =   7.33
             Charset         =   0
             Weight          =   700
             Underline       =   0   'False
@@ -246,7 +246,7 @@ Begin VB.Form Form1
          Caption         =   "复制此句译文从cn-compare\"
          BeginProperty Font 
             Name            =   "MS Sans Serif"
-            Size            =   8.25
+            Size            =   7.33
             Charset         =   0
             Weight          =   700
             Underline       =   0   'False
@@ -734,7 +734,7 @@ Private Sub cmdCopyJP_Click()
         Dim tempstr As String
         Dim str() As String
 
-        tempstr = Left(g_Script.JpText(g_CurSentence), 20)
+        tempstr = Left(g_Script.JpText(g_CurSentence), 40)
         tempstr = Mid(tempstr, 2)
         str = Split(tempstr, "-")
             
@@ -941,7 +941,7 @@ Public Sub OnHTMLClick()
             Dim tempstr As String
             Dim str() As String
             
-            tempstr = Left(g_Script.JpText(g_CurSentence), 20)
+            tempstr = Left(g_Script.JpText(g_CurSentence), 40)
             tempstr = Mid(tempstr, 2)
             str = Split(tempstr, "-")
             
