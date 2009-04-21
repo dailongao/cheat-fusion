@@ -115,7 +115,7 @@ Begin VB.Form Form1
       NoFolders       =   0   'False
       Transparent     =   0   'False
       ViewID          =   "{0057D0E0-3573-11CF-AE69-08002B2E1262}"
-      Location        =   "http:///"
+      Location        =   ""
    End
    Begin SHDocVwCtl.WebBrowser wbMain 
       Height          =   7005
@@ -140,7 +140,7 @@ Begin VB.Form Form1
       NoFolders       =   0   'False
       Transparent     =   0   'False
       ViewID          =   "{0057D0E0-3573-11CF-AE69-08002B2E1262}"
-      Location        =   "http:///"
+      Location        =   ""
    End
    Begin VB.Frame FrameTool 
       Height          =   2415
@@ -734,7 +734,7 @@ Private Sub cmdCopyJP_Click()
         Dim tempstr As String
         Dim str() As String
 
-        tempstr = Left(g_Script.JpText(g_CurSentence), 40)
+        tempstr = Left(g_Script.JpText(g_CurSentence), 30)
         tempstr = Mid(tempstr, 2)
         str = Split(tempstr, "-")
             
@@ -941,7 +941,7 @@ Public Sub OnHTMLClick()
             Dim tempstr As String
             Dim str() As String
             
-            tempstr = Left(g_Script.JpText(g_CurSentence), 40)
+            tempstr = Left(g_Script.JpText(g_CurSentence), 30)
             tempstr = Mid(tempstr, 2)
             str = Split(tempstr, "-")
             
