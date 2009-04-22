@@ -124,7 +124,7 @@ int convert_read(char *write_buffer,char * readtxt_buffer, FILE * txt_fp)
 	    }
 		
 		if(strstr(write_buffer,"{end}")==0){
-			strcpy(write_buffer,"{end}{N}{N}");
+			strcat(write_buffer,"{end}{N}{N}");
 		}
 /*//该段文本结束,先看看有没有{skip}		
 		if((strstr(write_buffer,"{skip}"))){
@@ -146,15 +146,18 @@ unsigned int convert_readptr(char *write_buffer,char * readptr_buffer, FILE * pt
 {
 	fgets(readptr_buffer,99,ptr_fp);
 	strcpy(write_buffer,"\0");
-	unsigned int jmp_end;
+	unsigned int jmp_start,jmp_end;
+	char *s;
 	
 	strtok(readptr_buffer,">");
 	strcpy(write_buffer,strtok(NULL,":"));
 	strcat(write_buffer,"\n");
-	strtok(NULL,",");
-	char *s=strtok(NULL,")");
-	jmp_end=strtoul(s+1,NULL,16);
-	return jmp_end;
+	strtok(NULL,"$");
+	s=strtok(NULL,"$");
+	jmp_start=strtoul(s,NULL,16);
+	s=strtok(NULL,")");
+	jmp_end=strtoul(s,NULL,16);
+	return jmp_end>jmp_start?jmp_end:jmp_start;
 }
 
 int main(){
