@@ -483,7 +483,7 @@ Private Sub CommonGrid_Init()
     Grid1.ColAlignment(5) = flexAlignLeftTop
     
     Grid1.ColWidth(0) = 0   'ДЫСавўВи
-    Grid1.ColWidth(1) = Grid1.Width * 0.1
+    Grid1.ColWidth(1) = Grid1.Width * 0.2
     Grid1.ColWidth(2) = Grid1.Width * 0.1
     Grid1.ColWidth(3) = Grid1.Width * 0.1
     Grid1.ColWidth(4) = Grid1.Width * 0.12
