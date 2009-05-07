@@ -395,6 +395,8 @@ Private Sub Cache_Rebuild(bWordsCalc As Boolean)
     Dim I&, j&, s$
     Dim tmp_info As SCRIPTINFO
     
+    Dim tmp_nWords As Integer
+    
     lstScript.Path = g_Dir & "\jp-text"
     lstScript.Pattern = "*.txt"
     lstScript.Refresh
@@ -416,13 +418,15 @@ Private Sub Cache_Rebuild(bWordsCalc As Boolean)
         If bWordsCalc Then
             g_CacheInfo(I).nWords = 0
             For j = 1 To tmp_info.JpCount
-                g_CacheInfo(I).nWords = g_CacheInfo(I).nWords + Tool_GetWords(tmp_info.JpText(j), LANGUAGE_JP)
+                tmp_nWords = Tool_GetWords(tmp_info.JpText(j), LANGUAGE_JP)
+                g_CacheInfo(I).nWords = g_CacheInfo(I).nWords + tmp_nWords
+                If tmp_info.CnText(j) <> "" And Left(tmp_info.JpText(j), 1) <> "¡þ" Then total_trans = total_trans + tmp_nWords
             Next j
         End If
         
         total_words = total_words + g_CacheInfo(I).nWords
         
-        If tmp_info.CnCount = tmp_info.dispCount Then total_trans = total_trans + g_CacheInfo(I).nWords
+        'If tmp_info.CnCount = tmp_info.dispCount Then total_trans = total_trans + g_CacheInfo(I).nWords
         
         g_CacheInfo(I).nTrans = tmp_info.CnCount
         g_CacheInfo(I).nTotal = tmp_info.dispCount
