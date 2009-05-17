@@ -732,9 +732,9 @@ for_i_next:
 
     End Sub
 
-    'Private Sub txtCN_OnKeyPressEvent(ByVal sender As Object, ByVal e As AxSynMemoU.ISynMemoXEvents_OnKeyPressEvent) Handles txtCN.OnKeyPress
-    '    g_lastkeycode = e.key
-    'End Sub
+    Private Sub txtCN_OnKeyPreviewDownEvent(ByVal sender As Object, ByVal e As System.Windows.Forms.PreviewKeyDownEventArgs) Handles txtCN.PreviewKeyDown
+        g_lastkeycode = e.KeyValue
+    End Sub
     Private Sub txtCN_OnChange(ByVal sender As Object, ByVal e As System.EventArgs) Handles txtCN.OnChange
         g_IsDirty = True
     End Sub
@@ -744,9 +744,9 @@ for_i_next:
         Dim doc As mshtml.IHTMLDocument2
         Dim ObjID As mshtml.IHTMLInputElement
         Dim keycode As Integer
-        keycode = e.keyCode
+        keycode = g_lastkeycode
 
-        If e.shift = 0 And (keycode = Keys.PrintScreen Or keycode = Keys.Pause) Then 'up/down
+        If e.shift = 0 And e.keyCode = 17 And (keycode = Keys.Up Or keycode = Keys.Down) Then 'up/down
             doc = wbMain.Document.DomDocument
             ObjID = doc.all.item("NEXT_ID")
 
@@ -756,7 +756,7 @@ for_i_next:
             End If
 
 
-            If keycode = Keys.Pause Then
+            If keycode = Keys.Down Then
                 ObjID.value = "+"
             Else
                 ObjID.value = "-"
@@ -769,7 +769,7 @@ for_i_next:
 
             OnHTMLClick()
         End If
-        'g_lastkeycode = 0
+        g_lastkeycode = 0
     End Sub
 
     'UPGRADE_WARNING: Event txtFontSize.TextChanged may fire when form is initialized. Click for more: 'ms-help://MS.VSCC.v80/dv_commoner/local/redirect.htm?keyword="88B12AE1-6DE0-48A0-86F1-60C0686C026A"'
