@@ -729,27 +729,18 @@ error_read:
 		Dim dst As SCRIPTINFO
 		Dim I As Integer
 		
-		'src = Script_GetInfo("00000009")
-		'For I = 123 To 734
-		'If I Mod 2 = 1 Then
-		'       src.CnText(I) = ""
-		'End If
-		'Next I
-		'Script_Save "00000009", src
-		
-		
-		If dst_id = "delsingle" Then
-			'UPGRADE_WARNING: Couldn't resolve default property of object src. Click for more: 'ms-help://MS.VSCC.v80/dv_commoner/local/redirect.htm?keyword="6A50421D-15FE-4896-8A1B-2EC21E9037B2"'
-			src = Script_GetInfo(src_id)
-			For I = src_start To src_end
-				If I Mod 2 = 1 Then
-					src.CnText(I) = ""
-				End If
-			Next I
-			Script_Save(src_id, src, LANGUAGE_CN)
-			
-			Exit Sub
-		End If
+        If dst_id = "delsingle" Then
+            'UPGRADE_WARNING: Couldn't resolve default property of object src. Click for more: 'ms-help://MS.VSCC.v80/dv_commoner/local/redirect.htm?keyword="6A50421D-15FE-4896-8A1B-2EC21E9037B2"'
+            src = Script_GetInfo(src_id)
+            For I = src_start To src_end
+                If I Mod 2 = 1 Then
+                    src.CnText(I) = ""
+                End If
+            Next I
+            Script_Save(src_id, src, LANGUAGE_CN)
+
+            Exit Sub
+        End If
 		
 		'UPGRADE_WARNING: Couldn't resolve default property of object src. Click for more: 'ms-help://MS.VSCC.v80/dv_commoner/local/redirect.htm?keyword="6A50421D-15FE-4896-8A1B-2EC21E9037B2"'
 		src = Script_GetInfo(src_id)
