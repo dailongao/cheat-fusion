@@ -115,7 +115,7 @@ Begin VB.Form Form1
       NoFolders       =   0   'False
       Transparent     =   0   'False
       ViewID          =   "{0057D0E0-3573-11CF-AE69-08002B2E1262}"
-      Location        =   ""
+      Location        =   "http:///"
    End
    Begin SHDocVwCtl.WebBrowser wbMain 
       Height          =   7005
@@ -140,7 +140,7 @@ Begin VB.Form Form1
       NoFolders       =   0   'False
       Transparent     =   0   'False
       ViewID          =   "{0057D0E0-3573-11CF-AE69-08002B2E1262}"
-      Location        =   ""
+      Location        =   "http:///"
    End
    Begin VB.Frame FrameTool 
       Height          =   2415
@@ -275,6 +275,8 @@ Private g_IsDirty As Boolean
 Private g_CurParagraph  As Long   '主画面的第几段
 
 Private g_is_compare_mode As Boolean
+
+Private Declare Function GetTempPath Lib "kernel32" Alias "GetTempPathA" (ByVal nBufferLength As Long, ByVal lpBuffer As String) As Long
 
 Private Function GetControlCodeHtml(s As String)
     GetControlCodeHtml = Replace(s, vbCrLf, "<br>")
@@ -475,12 +477,21 @@ for_i_next:
     
     If sPreviewFile = "" Then sPreviewFile = "preview.html"
     
+          Dim strTemp     As String, strUserName       As String
+          'Create   a   buffer
+          strTemp = String(100, Chr$(0))
+          'Get   the   temporary   path
+          GetTempPath 100, strTemp
+          'strip   the   rest   of   the   buffer
+          strTemp = Left$(strTemp, InStr(strTemp, Chr$(0)) - 1)
    
-    sHTMLFile = g_Dir & "\template\temp\" & sPreviewFile
+    sHTMLFile = strTemp & "preview.html"
+    'sHTMLFile = g_Dir & "\template\temp\" & sPreviewFile
     Tool_WriteTextFile sHTMLFile, sAll
     wbMain.Navigate2 sHTMLFile
     
-    sHTMLFile = g_Dir & "\template\temp\ruler.htm"
+    sHTMLFile = strTemp & "ruler.htm"
+    'sHTMLFile = g_Dir & "\template\temp\ruler.htm"
     Tool_WriteTextFile sHTMLFile, tpl_ruler
     wbRuler.Navigate2 sHTMLFile
     
