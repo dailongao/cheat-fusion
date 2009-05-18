@@ -10,7 +10,7 @@ Begin VB.Form Form4
    LinkTopic       =   "Form4"
    ScaleHeight     =   9420
    ScaleWidth      =   10875
-   StartUpPosition =   2  'CenterScreen
+   StartUpPosition =   2  '屏幕中心
    WindowState     =   2  'Maximized
    Begin VB.CommandButton mnuExport 
       Caption         =   "人名拆离"
@@ -228,6 +228,9 @@ Private g_ReplEnable()  As Boolean
 Private g_ReplHTMLJP() As String
 Private g_ReplHTMLCN() As String
 Private g_ReplHTMLUS() As String
+
+Private Declare Function GetTempPath Lib "kernel32" Alias "GetTempPathA" (ByVal nBufferLength As Long, ByVal lpBuffer As String) As Long
+
 
 Private Sub cmdReplace_Click()
 
@@ -485,7 +488,16 @@ Search_STOP:
     
     
     sAll = sAll & vbCrLf
-    sHTMLFile = g_Dir & "\template\temp\preview.html"
+    
+          Dim strTemp     As String, strUserName       As String
+          'Create   a   buffer
+          strTemp = String(100, Chr$(0))
+          'Get   the   temporary   path
+          GetTempPath 100, strTemp
+          'strip   the   rest   of   the   buffer
+          strTemp = Left$(strTemp, InStr(strTemp, Chr$(0)) - 1)
+    sHTMLFile = strTemp & "preview.html"
+    'sHTMLFile = g_Dir & "\template\temp\preview.html"
     Tool_WriteTextFile sHTMLFile, sAll
     
     wbMain.Navigate2 sHTMLFile
@@ -653,7 +665,16 @@ Search_STOP:
     
     
     sAll = sAll & vbCrLf & tpl_js
-    sHTMLFile = g_Dir & "\template\temp\preview.html"
+    
+          Dim strTemp     As String, strUserName       As String
+          'Create   a   buffer
+          strTemp = String(100, Chr$(0))
+          'Get   the   temporary   path
+          GetTempPath 100, strTemp
+          'strip   the   rest   of   the   buffer
+          strTemp = Left$(strTemp, InStr(strTemp, Chr$(0)) - 1)
+    sHTMLFile = strTemp & "preview.html"
+    'sHTMLFile = g_Dir & "\template\temp\preview.html"
     Tool_WriteTextFile sHTMLFile, sAll
     
     wbMain.Navigate2 sHTMLFile
