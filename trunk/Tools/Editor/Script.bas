@@ -778,3 +778,51 @@ Public Function SplitParaSen(ByVal sAddress$, ByRef sPara$, ByRef nSent&) As Boo
     SplitParaSen = True
 End Function
 
+Public Function ScriptSYNC_GetInfo_Format1_EX(strBaseDir As String, strID As String) As SCRIPTINFO
+
+    '获取信息 *
+    
+    Dim info  As SCRIPTINFO
+    
+    info.ID = strID
+    Dim sTemp() As String
+    
+    Dim fso As New FileSystemObject
+    Dim objFile As TextStream
+    Dim strFile As String
+    
+    Dim nReserverd As Long      '{repeat:   {dummy:
+    Dim I As Long '计算已经翻译了多少句
+    
+    nReserverd = 0
+    'read & decode jp, us, cn txt
+    '############# JP
+    strFile = strBaseDir & "\jp-text\" & strID & ".txt"
+    info.JpTextAll = Tool_LoadTextFile(strFile)
+    Script_DecodeText info.JpTextAll, info.JpText, info.Address
+    info.JpCount = UBound(info.JpText)
+    'for chrono cross
+    For I = 0 To UBound(info.JpText)
+        If Left(info.JpText(I), Len("{repeat:")) = "{repeat:" Or Left(info.JpText(I), Len("{dummy:")) = "{dummy:" Then nReserverd = nReserverd + 1
+    Next I
+    
+    
+    
+    '############# CN
+    strFile = strBaseDir & "\cn-text\" & strID & ".txt"
+    info.CnTextAll = Tool_LoadTextFile(strFile)
+    Script_DecodeText info.CnTextAll, info.CnText, sTemp
+    ReDim Preserve info.CnText(0 To info.JpCount)
+    info.CnCount = 0
+    For I = 0 To UBound(info.CnText)
+        If info.CnText(I) <> "" And Left(info.JpText(I), Len("{repeat:")) <> "{repeat:" And Left(info.JpText(I), Len("{dummy:")) <> "{dummy:" Then info.CnCount = info.CnCount + 1
+    Next I
+    
+    
+
+    
+    
+    'done
+    ScriptSYNC_GetInfo_Format1_EX = info
+    
+End Function
