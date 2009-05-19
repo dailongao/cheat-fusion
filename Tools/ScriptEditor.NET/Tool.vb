@@ -59,7 +59,7 @@ Module tool_common
 		Dim pos As Object
 		
 		'UPGRADE_WARNING: Couldn't resolve default property of object pos. Click for more: 'ms-help://MS.VSCC.v80/dv_commoner/local/redirect.htm?keyword="6A50421D-15FE-4896-8A1B-2EC21E9037B2"'
-		pos = InStr(1, strFilename, ".", CompareMethod.Text)
+        pos = InStrRev(strFilename, ".", -1, CompareMethod.Text)
 		
 		'UPGRADE_WARNING: Couldn't resolve default property of object pos. Click for more: 'ms-help://MS.VSCC.v80/dv_commoner/local/redirect.htm?keyword="6A50421D-15FE-4896-8A1B-2EC21E9037B2"'
 		If pos > 0 Then
@@ -190,14 +190,9 @@ file_exist_error:
 	
 	Public Function Tool_LoadTextFile(ByRef strFilename As String) As String
 		
-		Dim fso As New Scripting.FileSystemObject
-		Dim objFile As Scripting.TextStream
-		
+
 		On Error GoTo text_error
-		objFile = fso.OpenTextFile(strFilename, Scripting.IOMode.ForReading, False, Scripting.Tristate.TristateFalse)
-		Tool_LoadTextFile = objFile.ReadAll()
-		objFile.Close()
-		
+        Tool_LoadTextFile = My.Computer.FileSystem.ReadAllText(strFilename, System.Text.Encoding.Default)
 		Exit Function
 		
 text_error: 
@@ -208,15 +203,9 @@ text_error:
 	
 	Public Function Tool_WriteTextFile(ByRef strFilename As String, ByRef sText As String) As Boolean
 		
-		Dim fso As New Scripting.FileSystemObject
-		Dim objFile As Scripting.TextStream
-		
-		On Error GoTo text_error
-		objFile = fso.OpenTextFile(strFilename, Scripting.IOMode.ForWriting, True, Scripting.Tristate.TristateFalse)
-		objFile.Write(sText)
-		objFile.Close()
-		
-		Tool_WriteTextFile = True
+        On Error GoTo text_error
+        My.Computer.FileSystem.WriteAllText(strFilename, sText, False, System.Text.Encoding.Default)
+        Tool_WriteTextFile = True
 		Exit Function
 		
 text_error: 
@@ -226,19 +215,13 @@ text_error:
 	
 	Public Function Tool_WriteTextFileUnicode(ByRef strFilename As String, ByRef sText As String) As Boolean
 		
-		Dim fso As New Scripting.FileSystemObject
-		Dim objFile As Scripting.TextStream
-		
-		On Error GoTo text_error
-		objFile = fso.OpenTextFile(strFilename, Scripting.IOMode.ForWriting, True, Scripting.Tristate.TristateTrue)
-		objFile.Write(sText)
-		objFile.Close()
-		
-		Tool_WriteTextFileUnicode = True
-		Exit Function
-		
-text_error: 
-		Tool_WriteTextFileUnicode = False
+        On Error GoTo text_error
+        My.Computer.FileSystem.WriteAllText(strFilename, sText, False, System.Text.Encoding.Unicode)
+        Tool_WriteTextFileUnicode = True
+        Exit Function
+
+text_error:
+        Tool_WriteTextFileUnicode = False
 		
 	End Function
 	
