@@ -44,7 +44,7 @@ Public Function Tool_GetFilenameMain(strFilename As String) As String
     
     Dim pos As Integer
     
-    pos = InStrRev(strFilename, ".", 1, vbTextCompare)
+    pos = InStrRev(strFilename, ".", -1, vbTextCompare)
     
     If pos > 0 Then
         Tool_GetFilenameMain = Left(strFilename, pos - 1)
