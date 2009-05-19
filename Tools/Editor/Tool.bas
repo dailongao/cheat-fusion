@@ -42,9 +42,9 @@ Public Function Tool_GetFilenameMain(strFilename As String) As String
     '比如  hello.txt
     '得到  hello
     
-    Dim pos
+    Dim pos As Integer
     
-    pos = InStr(1, strFilename, ".", vbTextCompare)
+    pos = InStrRev(strFilename, ".", 1, vbTextCompare)
     
     If pos > 0 Then
         Tool_GetFilenameMain = Left(strFilename, pos - 1)

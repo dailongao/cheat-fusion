@@ -1,5 +1,5 @@
 VERSION 5.00
-Object = "{5E9E78A0-531B-11CF-91F6-C2863C385E30}#1.0#0"; "MSFLXGRD.OCX"
+Object = "{5E9E78A0-531B-11CF-91F6-C2863C385E30}#1.0#0"; "msflxgrd.ocx"
 Object = "{0E59F1D2-1FBE-11D0-8FF2-00A0D10038BC}#1.0#0"; "msscript.ocx"
 Begin VB.Form Form2 
    Caption         =   "Script Editor 4.0 (Build 06-07-23)"
@@ -780,7 +780,9 @@ Private Sub mnuRepeatSync_Click()
     Form2.info "正在同步..."
 
     Dim I&, j&, s$
-    Dim tmp_info As SCRIPTINFO
+    Dim tempID As String
+    Dim infopool() As SCRIPTINFO
+    Dim namepool() As String
     
     lstScript.Path = g_Dir & "\jp-text"
     lstScript.Pattern = "*.txt"
@@ -790,41 +792,48 @@ Private Sub mnuRepeatSync_Click()
         Exit Sub
     End If
     
-    Dim tempID As String
-    
+    ReDim namepool(lstScript.ListCount) As String
+    ReDim infopool(lstScript.ListCount) As SCRIPTINFO
     
     
     For I = 1 To lstScript.ListCount
-        
         tempID = Tool_GetFilenameMain(lstScript.List(I - 1))
-        tmp_info = Script_GetInfo(tempID)
-        
-        
+        namepool(I) = tempID
+        infopool(I) = Script_GetInfo(tempID)
+    Next
+    
+    For I = 1 To lstScript.ListCount
         Dim bsave As Boolean
         bsave = False
 
-        For j = 1 To tmp_info.JpCount
-            If Left(tmp_info.JpText(j), 1) = "〓" Then
-                Dim Repeat_Script As SCRIPTINFO
-                Dim Repeat_Sentence As Long
+        For j = 1 To infopool(I).JpCount
+            If Left(infopool(I).JpText(j), 1) = "〓" Then
+                Dim Repeat_Sentence As Integer
                 Dim tempstr As String
                 Dim str() As String
 
-                tempstr = Left(tmp_info.JpText(j), 30)
+                tempstr = Left(infopool(I).JpText(j), 30)
                 tempstr = Mid(tempstr, 2)
                 str = Split(tempstr, "-")
+                
+                Dim k As Integer
+                For k = 1 To lstScript.ListCount
+                    If StrComp(str(0), namepool(k), vbTextCompare) = 0 Then
+                        Exit For
+                    End If
+                Next
 
-                Repeat_Script = Script_GetInfo(str(0))
+                
                 Repeat_Sentence = Val(str(1))
-                If UBound(Repeat_Script.CnText) >= Repeat_Sentence And Repeat_Script.CnText(Repeat_Sentence) <> "" Then
-                    tmp_info.CnText(j) = Repeat_Script.CnText(Repeat_Sentence)
+                If UBound(infopool(k).CnText) >= Repeat_Sentence And infopool(k).CnText(Repeat_Sentence) <> "" Then
+                    infopool(I).CnText(j) = infopool(k).CnText(Repeat_Sentence)
                     bsave = True
                 End If
             End If
-        Next j
+        Next
 
         If bsave = True Then
-            Script_Save tempID, tmp_info, LANGUAGE_CN
+            Script_Save namepool(I), infopool(I), LANGUAGE_CN
         End If
         
         
@@ -832,7 +841,7 @@ Private Sub mnuRepeatSync_Click()
         
         DoEvents
         
-    Next I
+    Next
     
 
     Form2.info "重复文本已同步"
