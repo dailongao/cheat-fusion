@@ -38,13 +38,14 @@ public:
 
 	bool GetTextValue(const string& Hexstring, string& RetTextString);
 	bool GetHexValue(const string& Textstring, string& RetHexString);
+	
+	int GetLinkedBytes(const string& Hexstring, string& RetTextString);
 
 	bool OutputError(const char* filename);
 	bool OutputError();
 
 	int LongestHex;       // The longest hex entry, in bytes
 	int LongestText[256]; // LUT for the longest text string starting with the first character
-	LinkedEntryMap LinkedEntries;  // $FF=<text>,num type entries (Dumping)
 	
 	string DefAutoFill;
 	string DefAlignFill;
@@ -64,6 +65,8 @@ private:
 	
 	StringPairMap LookupText; // for looking up text values.  (Dumping)
 	StringPairMap LookupHex;  // for looking up hex values.  (Insertion)
+	
+	LinkedEntryMap LinkedEntries;  // $FF=<text>:num type entries (Dumping)
 
 	int LineNumber;
 

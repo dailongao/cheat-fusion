@@ -137,6 +137,17 @@ bool TableReader::GetHexValue(const string& Textstring, string& RetHexString)
 	return false;
 }
 
+int TableReader::GetLinkedBytes(const string& Hexstring, string& RetTextString)
+{
+	LinkedEntryMapIt it = LinkedEntries.find(Hexstring);
+	if(it != LinkedEntries.end())
+	{
+		RetTextString = it->second.Text;
+		return it->second.Number;
+	}
+	return 0;
+}
+
 bool TableReader::OutputError(const char* filename)
 {
 	ofstream logtxt(filename, ios::out);
