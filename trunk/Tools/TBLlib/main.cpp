@@ -15,12 +15,14 @@ int main()
 	
 	if(tbl.OpenTable("test.tbl")==true){
 		cout<<"open ok\n";
-		tbl.GetTextValue("7896543210",ret);
+		cout<<tbl.GetLinkBytes("1a",ret);
 		cout<<ret<<"\n";
 		ret.clear();
-		if(tbl.GetHexValue("{end}",ret)==true)
-			cout<<ret;
-		else cout<<"err";
+
+		cout<<tbl.DefAutoFill<<"\n";
+		
+		cout<<tbl.GetLinkBytes("8790",ret);
+		cout<<ret;
 		
         tbl.OutputError();
 	}
