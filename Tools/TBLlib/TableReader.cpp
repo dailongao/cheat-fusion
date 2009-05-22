@@ -71,7 +71,6 @@ bool TableReader::OpenTable(const char* TableFilename)
 		switch((*i)[0]) // first character of the line
 		{
 		case '$':
-			parselink(*i);
 			break;
 		case '(': // Bookmark (not implemented)
 			break;
@@ -111,9 +110,11 @@ bool TableReader::OpenTable(const char* TableFilename)
 // GetTextValue() - Returns a Text String from a Hexstring from the table
 //-----------------------------------------------------------------------------
 
-bool TableReader::GetTextValue(const string& Hexstring, string& RetTextString)
+bool TableReader::GetTextValue(const string& HexString, string& RetTextString)
 {
-	StringPairMapIt it = LookupText.find(Hexstring);
+    string s = HexString;
+	transform(HexString.begin(), HexString.end(), s.begin(), (int(*)(int))toupper);
+	StringPairMapIt it = LookupText.find(s);
 	if(it != LookupText.end()) // Found
 	{
 		RetTextString = it->second;
@@ -137,9 +138,11 @@ bool TableReader::GetHexValue(const string& Textstring, string& RetHexString)
 	return false;
 }
 
-int TableReader::GetLinkedBytes(const string& Hexstring, string& RetTextString)
+int TableReader::GetLinkBytes(const string& HexString, string& RetTextString)
 {
-	LinkedEntryMapIt it = LinkedEntries.find(Hexstring);
+    string s = HexString;
+	transform(HexString.begin(), HexString.end(), s.begin(), (int(*)(int))toupper);
+	LinkedEntryMapIt it = LinkedEntries.find(s);
 	if(it != LinkedEntries.end())
 	{
 		RetTextString = it->second.Text;
@@ -299,112 +302,49 @@ inline bool TableReader::parseentry(string line)
 		TableErrors.push_back(err);
 		return false;
 	}
+	line.erase(0, pos+1);
+	
+	pos = line.find_first_of(":",0);
+	if(pos == string::npos)
+	{
+		textstr = line;
+	}
 	else
 	{
-		line.erase(0, pos+1);
-		textstr = line;
+		int lpos = line.find_first_of("{",0);
+		int rpos = line.find_first_not_of("0123456789}", pos+1);
+		if(lpos!=string::npos && rpos==string::npos){
+			line.replace(pos, 1, "}");
+			textstr = line.substr(0, pos+1);
+			if(ReaderType == ReadTypeDump){
+				line.erase(0, pos+1);
+				LINKED_ENTRY l;
+				l.Text = textstr;
+				l.Number = strtoul(line.c_str(), NULL, 10);
+				transform(hexstr.begin(), hexstr.end(), hexstr.begin(), (int(*)(int))toupper);
+				LinkedEntryMapIt it = LinkedEntries.lower_bound(hexstr);
+				if(it != LinkedEntries.end() && !(LinkedEntries.key_comp()(hexstr, it->first))) // Multiple entries
+				{
+					err.LineNumber = LineNumber;
+					err.Description = "Hex token part of the linked entry is already in the table.";
+					TableErrors.push_back(err);
+					return false;
+				}
+				else // Inserters only need to look up hex values
+					LinkedEntries.insert(it, LinkedEntryMap::value_type(hexstr, l));
+					
+				if(LongestHex < (int)hexstr.length())
+					LongestHex = (int)hexstr.length();					
+				return true;
+			}
+		}
+		else{
+			err.LineNumber = LineNumber;
+			err.Description = "Link CtrlCode format error";
+			TableErrors.push_back(err);
+			return false;		
+		}
 	}
 
 	return AddToMaps(hexstr, textstr);
 }
-
-//-----------------------------------------------------------------------------
-// parselink() - Parsed a linked entry, like $10F0={text}:2
-//             - Prints both the {text} part and 2 bytes afterwards
-//-----------------------------------------------------------------------------
-
-inline bool TableReader::parselink(string line)
-{
-	LINKED_ENTRY l;
-	size_t pos;
-
-	line.erase(0, 1);
-	pos = line.find_first_not_of(HexAlphaNum, 0);
-
-	string hexstr = line.substr(0, pos);
-	if((hexstr.length() % 2) != 0)
-	{
-		err.LineNumber = LineNumber;
-		err.Description = "Hex token length is not a multiple of 2";
-		TableErrors.push_back(err);
-		return false;
-	}
-
-	string textstr;
-	pos = line.find_first_of("=", 0);
-
-	if(pos == string::npos)
-	{
-		err.LineNumber = LineNumber;
-		err.Description = "No equal sign, linked entry format is $XX={text}:num";
-		TableErrors.push_back(err);
-		return false;
-	}
-
-	line.erase(0, pos+1);
-
-	pos = line.find_first_of(":",0);
-
-	if(pos == string::npos)
-	{
-		err.LineNumber = LineNumber;
-		err.Description = "No comma, linked entry format is $XX={text}:num";
-		TableErrors.push_back(err);
-		return false;
-	}
-
-	textstr = line.substr(0, pos);
-	line.erase(0, pos+1);
-
-	pos = line.find_first_not_of("0123456789", 0);
-	if(pos != string::npos)
-	{
-		err.LineNumber = LineNumber;
-		err.Description = "Nonnumeric characters in num field, linked entry format is $XX={text}:num";
-		TableErrors.push_back(err);
-		return false;
-	}
-
-	l.Text = textstr;
-	l.Number = strtoul(line.c_str(), NULL, 10);
-	string ModString = textstr;
-	if(ReaderType == ReadTypeDump) // Add linked entry to the dumper
-	{
-		transform(hexstr.begin(), hexstr.end(), hexstr.begin(), (int(*)(int))toupper);
-		LinkedEntryMapIt it = LinkedEntries.lower_bound(hexstr);
-		if(it != LinkedEntries.end() && !(LinkedEntries.key_comp()(hexstr, it->first))) // Multiple entries
-		{
-			err.LineNumber = LineNumber;
-			err.Description = "Hex token part of the linked entry is already in the table.";
-			TableErrors.push_back(err);
-			return false;
-		}
-		else // Inserters only need to look up hex values
-			LinkedEntries.insert(it, LinkedEntryMap::value_type(hexstr, l));
-	}
-	else if(ReaderType == ReadTypeInsert) // Add hexstr=textstr portion to the inserter
-	{
-		StringPairMapIt it = LookupHex.lower_bound(ModString);
-		if(it != LookupHex.end() && !(LookupHex.key_comp()(ModString, it->first))) // Check for multiple TextString entries (Insertion confliction)
-		{
-			err.LineNumber = LineNumber;
-			err.Description = "Text token part of the linked entry is already in the table.";
-			TableErrors.push_back(err);
-			return false;
-		}
-		else // Inserters only need to look up hex values
-			LookupHex.insert(it, StringPairMap::value_type(ModString, hexstr));
-	}
-	
-	if(LongestHex < (int)hexstr.length())
-		LongestHex = (int)hexstr.length();
-	if(ModString.length() > 0)
-	{
-		if(LongestText[(unsigned char)ModString[0]] < (int)ModString.length())
-		LongestText[(unsigned char)ModString[0]] = (int)ModString.length();
-	}
-
-	return true;
-}
-
-
