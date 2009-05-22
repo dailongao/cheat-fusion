@@ -12,17 +12,22 @@ int main()
 {
 	TableReader tbl(ReadTypeDump);
 	string ret;
+	int jumpbytes;
 	
 	if(tbl.OpenTable("test.tbl")==true){
 		cout<<"open ok\n";
-		cout<<tbl.GetLinkBytes("1a",ret);
-		cout<<ret<<"\n";
-		ret.clear();
-
-		cout<<tbl.DefAutoFill<<"\n";
-		
-		cout<<tbl.GetLinkBytes("8790",ret);
-		cout<<ret;
+		if(tbl.GetTextValue("7890",ret,jumpbytes)==true)
+			cout<<ret<<","<<jumpbytes<<"\n";
+		else
+			cout<<"cant find";
+		if(tbl.GetTextValue("0e",ret,jumpbytes)==true)
+			cout<<ret<<","<<jumpbytes<<"\n";
+		else
+			cout<<"cant find";
+		if(tbl.GetTextValue("90",ret,jumpbytes)==true)
+			cout<<ret<<","<<jumpbytes<<"\n";
+		else
+			cout<<"cant find";
 		
         tbl.OutputError();
 	}

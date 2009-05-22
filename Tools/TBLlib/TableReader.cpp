@@ -110,16 +110,26 @@ bool TableReader::OpenTable(const char* TableFilename)
 // GetTextValue() - Returns a Text String from a Hexstring from the table
 //-----------------------------------------------------------------------------
 
-bool TableReader::GetTextValue(const string& HexString, string& RetTextString)
+bool TableReader::GetTextValue(const string& HexString, string& RetTextString, int& linkbytes)
 {
     string s = HexString;
 	transform(HexString.begin(), HexString.end(), s.begin(), (int(*)(int))toupper);
+	linkbytes = 0;
+	
 	StringPairMapIt it = LookupText.find(s);
 	if(it != LookupText.end()) // Found
 	{
 		RetTextString = it->second;
 		return true;
 	}
+	
+	LinkedEntryMapIt linkit = LinkedEntries.find(s);
+	if(linkit != LinkedEntries.end())
+	{
+		RetTextString = linkit->second.Text;
+		linkbytes = linkit->second.Number;
+		return true;
+	}	
 	return false;
 }
 
@@ -136,19 +146,6 @@ bool TableReader::GetHexValue(const string& Textstring, string& RetHexString)
 		return true;
 	}
 	return false;
-}
-
-int TableReader::GetLinkBytes(const string& HexString, string& RetTextString)
-{
-    string s = HexString;
-	transform(HexString.begin(), HexString.end(), s.begin(), (int(*)(int))toupper);
-	LinkedEntryMapIt it = LinkedEntries.find(s);
-	if(it != LinkedEntries.end())
-	{
-		RetTextString = it->second.Text;
-		return it->second.Number;
-	}
-	return 0;
 }
 
 bool TableReader::OutputError(const char* filename)
