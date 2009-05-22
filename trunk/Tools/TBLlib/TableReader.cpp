@@ -14,6 +14,8 @@ TBL_ERROR err;
 
 TableReader::TableReader(const TableReaderType type)
 {
+	DefAutoFill = "00";
+	DefAlignFill = "00";
 	DefEndLine = "{N}";
 	DefEndString = "{end}";
 	LongestHex = 1;
@@ -78,14 +80,13 @@ bool TableReader::OpenTable(const char* TableFilename)
 		case '{': // Script insert (not implemented)
 			break;
 		case '@':	//insert auto fill char
+			parseautofill(*i);
 			break;
 		case '~':	//insert test alignment fill char
 			break;
 		case '/': // End string value
-			//parseendstring(*i);
 			break;
 		case '*': // End line value
-			//parseendline(*i);
 			break;
 		case '0': case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9':
 		case 'a': case 'b': case 'c': case 'd': case 'e': case 'f': case 'A': case 'B': case 'C': case 'D':
@@ -229,67 +230,15 @@ inline void TableReader::InitHexTable()
 }
 
 //-----------------------------------------------------------------------------
-// parseendline() - parses a break line table value: ex, *FE
-// You can also define messages like *FE=<End Text>
+// parseautofill() - parses a auto fill table value: ex, @00
 //-----------------------------------------------------------------------------
 
-inline bool TableReader::parseendline(string line)
+inline bool TableReader::parseautofill(string line)
 {
 	line.erase(0, 1);
 	size_t pos = line.find_first_not_of(HexAlphaNum, 0);
 	string hexstr;
-	string textstr;
 	
-	if(pos == string::npos) // Non-alphanum characters not found, *FE type entry?
-	{
-		textstr= DefEndLine;
-		hexstr = line;
-		return false;
-	}
-	else
-		hexstr = line.substr(0, pos);
-
-	if((hexstr.length() % 2) != 0)
-	{
-		err.LineNumber = LineNumber;
-		err.Description = "Hex token length is not a multiple of 2";
-		TableErrors.push_back(err);
-		return false;
-	}
-
-	pos = line.find_first_of("=", 0);
-	if(pos == string::npos) // No equal sign means it's a default entry
-		textstr = DefEndLine;
-	else
-	{
-		line.erase(0, pos+1);
-		textstr = line;
-	}
-
-	return AddToMaps(hexstr, textstr);
-}
-
-//-----------------------------------------------------------------------------
-// parseendstring() - parses a string break table value
-// Ones like /FF=<end>, /FF, and /<end> (blank string value)
-//-----------------------------------------------------------------------------
-
-inline bool TableReader::parseendstring(string line)
-{
-	line.erase(0, 1);
-	size_t pos = line.find_first_of(HexAlphaNum, 0);
-
-	string hexstr;
-	string textstr;
-
-	if(pos != 0) // /<end> type entry
-	{
-		EndTokens.push_back(line);
-		string s = "";
-		return AddToMaps(s, line);
-	}
-
-	pos = line.find_first_not_of(HexAlphaNum, 0);
 	hexstr = line.substr(0, pos);
 
 	if((hexstr.length() % 2) != 0)
@@ -300,27 +249,8 @@ inline bool TableReader::parseendstring(string line)
 		return false;
 	}
 
-	pos = line.find_first_of("=", 0);
-	if(pos == string::npos) // No "=" found, a /FF type entry
-		textstr = DefEndString;
-	else
-	{
-		line.erase(0, pos+1);
-		textstr = line;
-		if(textstr.length() == 0)
-		{
-			err.LineNumber = LineNumber;
-			err.Description = "Blank right side strings for /FF=<end> aren't allowed";
-			TableErrors.push_back(err);
-			return false;
-		}
-	}
-
-	string ModString = line;
-	//removecontrolcodes(ModString);
-	EndTokens.push_back(ModString); // Only the inserter uses this
-
-	return AddToMaps(hexstr, textstr);
+	DefAutoFill = hexstr;
+	return true;
 }
 
 //-----------------------------------------------------------------------------
@@ -368,7 +298,7 @@ inline bool TableReader::parseentry(string line)
 }
 
 //-----------------------------------------------------------------------------
-// parselink() - Parsed a linked entry, like $10F0={text},2
+// parselink() - Parsed a linked entry, like $10F0={text}:2
 //             - Prints both the {text} part and 2 bytes afterwards
 //-----------------------------------------------------------------------------
 
@@ -395,19 +325,19 @@ inline bool TableReader::parselink(string line)
 	if(pos == string::npos)
 	{
 		err.LineNumber = LineNumber;
-		err.Description = "No equal sign, linked entry format is $XX={text},num";
+		err.Description = "No equal sign, linked entry format is $XX={text}:num";
 		TableErrors.push_back(err);
 		return false;
 	}
 
 	line.erase(0, pos+1);
 
-	pos = line.find_first_of(",",0);
+	pos = line.find_first_of(":",0);
 
 	if(pos == string::npos)
 	{
 		err.LineNumber = LineNumber;
-		err.Description = "No comma, linked entry format is $XX={text},num";
+		err.Description = "No comma, linked entry format is $XX={text}:num";
 		TableErrors.push_back(err);
 		return false;
 	}
@@ -419,7 +349,7 @@ inline bool TableReader::parselink(string line)
 	if(pos != string::npos)
 	{
 		err.LineNumber = LineNumber;
-		err.Description = "Nonnumeric characters in num field, linked entry format is $XX={text},num";
+		err.Description = "Nonnumeric characters in num field, linked entry format is $XX={text}:num";
 		TableErrors.push_back(err);
 		return false;
 	}
