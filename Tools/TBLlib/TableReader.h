@@ -38,27 +38,29 @@ public:
 
 	bool GetTextValue(const string& Hexstring, string& RetTextString);
 	bool GetHexValue(const string& Textstring, string& RetHexString);
-	
+
 	bool OutputError(const char* filename);
 	bool OutputError();
-	vector<TBL_ERROR> TableErrors;
 
 	int LongestHex;       // The longest hex entry, in bytes
 	int LongestText[256]; // LUT for the longest text string starting with the first character
 	LinkedEntryMap LinkedEntries;  // $FF=<text>,num type entries (Dumping)
-	list<string> EndTokens;        // End string tokens
+	
+	string DefAutoFill;
+	string DefAlignFill;
 	
 	string DefEndLine;
 	string DefEndString;
 
 private:
-	inline bool parseendline(string line);
-	inline bool parseendstring(string line);
+	inline bool parseautofill(string line);
 	inline bool parseentry(string line);
 	inline bool parselink(string line);
 
 	inline bool AddToMaps(string& HexString, string& TextString);
 	inline void InitHexTable();
+	
+	vector<TBL_ERROR> TableErrors;
 	
 	StringPairMap LookupText; // for looking up text values.  (Dumping)
 	StringPairMap LookupHex;  // for looking up hex values.  (Insertion)
