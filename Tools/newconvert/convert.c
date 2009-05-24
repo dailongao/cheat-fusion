@@ -245,7 +245,7 @@ while( (p=readdir(dir))!=NULL )
 	fclose(ptr_fp);
 	fclose(convert_fp);
 }
-
+closedir(dir);
 	fclose(batch_fp);
 	printf("finish converting");
 	getch();
