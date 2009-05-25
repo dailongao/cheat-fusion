@@ -36,7 +36,7 @@ public:
 
 	bool OpenTable(const char* TableFilename);
 
-	bool GetTextValue(const string& Hexstring, string& RetTextString, int& linkbytes);
+	bool GetTextValue(const string& CapitalHexstring, string& RetTextString, int& linkbytes);
 	bool GetHexValue(const string& Textstring, string& RetHexString);	
 
 	bool OutputError(const char* filename);

@@ -110,20 +110,20 @@ bool TableReader::OpenTable(const char* TableFilename)
 // GetTextValue() - Returns a Text String from a Hexstring from the table
 //-----------------------------------------------------------------------------
 
-bool TableReader::GetTextValue(const string& HexString, string& RetTextString, int& linkbytes)
+bool TableReader::GetTextValue(const string& CapitalHexString, string& RetTextString, int& linkbytes)
 {
-    string s = HexString;
-	transform(HexString.begin(), HexString.end(), s.begin(), (int(*)(int))toupper);
+    //string s = HexString;
+	//transform(HexString.begin(), HexString.end(), s.begin(), (int(*)(int))toupper);
 	linkbytes = 0;
 	
-	StringPairMapIt it = LookupText.find(s);
+	StringPairMapIt it = LookupText.find(CapitalHexString);
 	if(it != LookupText.end()) // Found
 	{
 		RetTextString = it->second;
 		return true;
 	}
 	
-	LinkedEntryMapIt linkit = LinkedEntries.find(s);
+	LinkedEntryMapIt linkit = LinkedEntries.find(CapitalHexString);
 	if(linkit != LinkedEntries.end())
 	{
 		RetTextString = linkit->second.Text;
