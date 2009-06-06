@@ -37,6 +37,19 @@ void MakePPF(int listlength, char** flist,unsigned long long* offsetlist,char* f
 			//header
 			fwrite(magic,1,4,ppfout);
 			fwrite(magic,1,4,backupout);
+			fwrite(magic,1,4,ppfout);
+			fwrite(magic,1,4,backupout);
+			
+			fseek(isoin,0,SEEK_END);
+			unsigned long long isosize = ftell(isoin);
+			fwrite(&isosize,1,8,ppfout);
+			fwrite(&isosize,1,8,backupout);
+			
+			fseek(isoin,0x10000,SEEK_SET);
+			char cmpbuf[256];
+			fread(cmpbuf,1,240,isoin);
+			fwrite(cmpbuf,1,240,ppfout);
+			fwrite(cmpbuf,1,240,backupout);
 			
 		    //read & write each file in the list
 		    for(int i=0;i<listlength;i++)
