@@ -17,7 +17,7 @@ void MakePPF(int listlength, char** flist,unsigned long long* offsetlist,char* f
         {*/
 		    //the iso file
             char* fbuf = 0, *fbuf2 = 0, *fibuf = 0 ;
-		    FILE* isoin = fopen(fiso, "rb");
+		    FILE* isoin = fopen64(fiso, "rb");
             fibuf = new char[32768];
             setvbuf(isoin, fibuf, _IOFBF, 32768);
 			
@@ -40,12 +40,12 @@ void MakePPF(int listlength, char** flist,unsigned long long* offsetlist,char* f
 			fwrite(magic,1,4,ppfout);
 			fwrite(magic,1,4,backupout);
 			
-			fseek(isoin,0,SEEK_END);
-			unsigned long long isosize = ftell(isoin);
+			fseeko64(isoin,0,SEEK_END);
+			unsigned long long isosize = ftello64(isoin);
 			fwrite(&isosize,1,8,ppfout);
 			fwrite(&isosize,1,8,backupout);
 			
-			fseek(isoin,0x10000,SEEK_SET);
+			fseeko64(isoin,0x10000,SEEK_SET);
 			char cmpbuf[256];
 			fread(cmpbuf,1,240,isoin);
 			fwrite(cmpbuf,1,240,ppfout);
@@ -104,7 +104,7 @@ void _WritePPFData(FILE* ppfout,FILE* backupout,FILE* isoin,char* fsrc, unsigned
 		    unsigned long long p = position-buffersize+1;
             //printf("\n%I64X %d %I64X,",position,buffersize,p);getch();
 			fread(buffer, 1, buffersize, datain);//read data
-            fseek(isoin, p, SEEK_SET);
+            fseeko64(isoin, p, SEEK_SET);
             fread(bbuffer, 1, buffersize, isoin);//read backup data
             //compare with original
             if(memcmp(bbuffer, buffer, buffersize)!=0)
