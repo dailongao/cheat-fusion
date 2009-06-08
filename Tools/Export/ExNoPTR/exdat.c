@@ -59,7 +59,7 @@ while(!feof(list_fp) && strcmp(readlist,"\n")!=0)
 	ex_end=strtoul(nextp+1,NULL,16);
 	
 	strtok(filename,".");
-	sprintf(outfile,"%s_%03d.txt",filename,j);
+	sprintf(outfile,"%s_%08X.txt",filename,ex_start);
 	out_fp=fopen(outfile,"wt");
 	txt_number=1;	
 		cur=ex_start;
