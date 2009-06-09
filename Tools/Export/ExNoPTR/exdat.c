@@ -8,6 +8,7 @@
 #include "tbl.h"
 
 #define ALIGN4(adr) ((adr+3)&(~3))
+#define MINEXCOUNT 2
 
 int IsScriptStart(unsigned int adr)
 {
@@ -86,7 +87,7 @@ while(!feof(list_fp) && strcmp(readlist,"\n")!=0)
 					if(sect_flag==1){
 						if(strcmp(str,"{end}")==0) {
 							sect_end=ALIGN4(cur+(4-check));
-							if(found_count>2){
+							if(found_count>=MINEXCOUNT){
 								strcat(buffer,"{end}\n");
 								fprintf(out_fp,"#### %d <#JMP($%X,$%X)>####\n%s\n",txt_number++,sect_start,sect_end,buffer);
 							}
