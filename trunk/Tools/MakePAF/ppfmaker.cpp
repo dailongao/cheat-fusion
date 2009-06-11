@@ -25,10 +25,14 @@ void MakePPF(int listlength, char** flist,unsigned long long* offsetlist,char* f
 		    FILE* ppfout=fopen(fppf, "wb+");
             fbuf = new char[32768];
             setvbuf(ppfout, fbuf, _IOFBF, 32768);
-            char fbackup[1024];
-            fbackup[0] = 0;
-            strcpy(fbackup, fppf);
-            strcat(fbackup, ".bak");
+            char fbackup[512];
+			char dirname[512];
+            char filename[128];
+			strcpy(dirname,fppf);
+			char *namep = strrchr(dirname,'\\');
+			strcpy(filename,namep+1);
+			*(namep+1)=0;
+			sprintf(fbackup,"%sUndo_%s",dirname,filename);
 		    //the backup ppf file
 		    FILE* backupout = fopen(fbackup, "wb+");
             fbuf2 = new char[32768];
