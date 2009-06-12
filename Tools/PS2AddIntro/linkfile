@@ -1,0 +1,70 @@
+ENTRY(_start);
+
+SECTIONS {
+	/* we will define _start_address at link time from the makefile */
+	. = _start_address;
+	.text : {
+		*(.startup_text)
+		*(.text)
+		*(.gnu.linkonce.t*)
+		KEEP(*(.init))
+		KEEP(*(.fini))
+		*(.copy2ram_data)
+		*(.copy2ram_text)
+	}
+	.reginfo ALIGN(128): { *(.reginfo) }
+
+
+	.ctors ALIGN(16): {
+		KEEP(*crtbegin*.o(.ctors))
+		KEEP(*(EXCLUDE_FILE(*crtend*.o) .ctors))
+		KEEP(*(SORT(.ctors.*)))
+		KEEP(*(.ctors))
+	}
+	.dtors ALIGN(16): {
+		KEEP(*crtbegin*.o(.dtors))
+		KEEP(*(EXCLUDE_FILE(*crtend*.o) .dtors))
+		KEEP(*(SORT(.dtors.*)))
+		KEEP(*(.dtors))
+	}
+	/* Static data.  */
+	.rodata ALIGN(128): {
+		*(.rodata)
+		*(.gnu.linkonce.r*)
+	}
+	.data ALIGN(128): {
+		*(.data)
+		*(.data.*)
+		*(.gnu.linkonce.d*)
+		SORT(CONSTRUCTORS)
+	}
+	.rdata ALIGN(128): { *(.rdata) }
+	.gcc_except_table ALIGN(128): { *(.gcc_except_table) }
+	_gp = ALIGN(128) + 0x7ff0;
+	.lit4 ALIGN(128): { *(.lit4) }
+	.lit8 ALIGN(128): { *(.lit8) }
+	.sdata ALIGN(128): {
+		*(.sdata)
+		*(.sdata.*)
+		*(.gnu.linkonce.s*)
+	}
+
+	. = _start_bss;
+	/* Uninitialized data.  */
+	.sbss ALIGN(128) (NOLOAD): {
+		_fbss = . ;
+		*(.scommon)
+		*(.sbss)
+	}
+	.bss ALIGN(128) (NOLOAD): { *(.bss) }
+	.COMMON ALIGN(128) (NOLOAD): { *(COMMON) }
+	_end_bss = .;
+
+	_end = . ;
+	PROVIDE(end = .);
+
+	/* Symbols needed by crt0.s.  */
+	PROVIDE(_heap_size = HEAPSIZE);
+	PROVIDE(_stack = -1);
+	PROVIDE(_stack_size = 128 * 1024);
+}
