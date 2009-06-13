@@ -4,6 +4,7 @@ SECTIONS {
 	/* we will define _start_address at link time from the makefile */
 	. = _start_address;
 	.text : {
+		_ftext = . ;
 		*(.startup_text)
 		*(.text)
 		*(.gnu.linkonce.t*)
@@ -12,6 +13,8 @@ SECTIONS {
 		*(.copy2ram_data)
 		*(.copy2ram_text)
 	}
+	PROVIDE(_etext = .);
+	PROVIDE(etext = .);
 	.reginfo ALIGN(128): { *(.reginfo) }
 
 
@@ -33,6 +36,7 @@ SECTIONS {
 		*(.gnu.linkonce.r*)
 	}
 	.data ALIGN(128): {
+		_fdata = . ;
 		*(.data)
 		*(.data.*)
 		*(.gnu.linkonce.d*)
@@ -48,6 +52,8 @@ SECTIONS {
 		*(.sdata.*)
 		*(.gnu.linkonce.s*)
 	}
+	_edata = .;
+	PROVIDE(edata = .);
 
 	. = _start_bss;
 	/* Uninitialized data.  */
