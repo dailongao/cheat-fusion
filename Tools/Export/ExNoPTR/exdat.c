@@ -48,6 +48,14 @@ int main()
 		return 1;
 	}
 	
+	char *filename_ptr;
+	*strrchr(filename,'.')=0;
+	filename_ptr=filename;
+	temp=strrchr(filename,'\\');
+	if(temp!=NULL){
+		filename_ptr=temp+1;
+	}
+	
 	fseek(rom_fp,0,SEEK_END);
 	filesize=ftell(rom_fp);
 
@@ -59,13 +67,6 @@ while(!feof(list_fp) && strcmp(readlist,"\n")!=0)
 	ex_start=strtoul(readlist,&nextp,16);
 	ex_end=strtoul(nextp+1,NULL,16);
 	
-	char *filename_ptr;
-	*strrchr(filename,'.')=0;
-	filename_ptr=filename;
-	temp=strrchr(filename,'\\');
-	if(temp!=NULL){
-		filename_ptr=temp+1;
-	}
 	sprintf(outfile,"%s_%08X.txt",filename_ptr,ex_start);
 	out_fp=fopen(outfile,"wt");
 	txt_number=1;	
