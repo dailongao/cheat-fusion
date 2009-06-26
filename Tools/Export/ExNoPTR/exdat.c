@@ -49,7 +49,10 @@ int main()
 	}
 	
 	char *filename_ptr;
-	*strrchr(filename,'.')=0;
+	temp=strrchr(filename,'.');
+	if(temp!=NULL){
+		*temp=0;
+	}
 	filename_ptr=filename;
 	temp=strrchr(filename,'\\');
 	if(temp!=NULL){
