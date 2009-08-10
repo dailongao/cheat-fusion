@@ -389,7 +389,7 @@ Public Sub Load(sNo As Long, sPreviewFile As String)
         
         If g_is_compare_mode Then
             
-            If g_Script.CnTextAlter(I) <> g_Script.CnText(I) And g_Script.CnText(I) <> "" Then
+            If g_Script.CnTextAlter(I) <> g_Script.CnText(I) Then 'And g_Script.CnText(I) <> "" Then
                 If chkCode.Value = 1 Then
                     sItemCNCompare = GetControlCodeHtml(g_Script.CnTextAlter(I))
                 Else
@@ -616,7 +616,7 @@ Public Sub LoadEvent(sEventID As String, sPreviewFile As String)
         
         If g_is_compare_mode Then
             
-            If g_Script.CnTextAlter(I) <> g_Script.CnText(I) And g_Script.CnText(I) <> "" Then
+            If g_Script.CnTextAlter(I) <> g_Script.CnText(I) Then 'And g_Script.CnText(I) <> "" Then
                 sItemCNCompare = Callback_Preview(g_Script.CnTextAlter(I), LANGUAGE_CN)
                 nAlters = nAlters + 1
                 MarkTextDiffHTML sItemCN, sItemCNCompare
