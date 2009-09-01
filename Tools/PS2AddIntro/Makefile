@@ -25,7 +25,7 @@ all: $(TARGETS)
 intro.elf: $(INTRODIR)crt0.o $(USR_RESTOREFILE).o main.o $(UCL_ELFTEXTFILE).o $(INTRODIR)unpack.S
 	$(EE_CC) -nostartfiles -Wl,--defsym,_start_address=$(USR_STARTADR) -o $(TARGETS) \
 	$(INTRODIR)crt0.o $(USR_RESTOREFILE).o main.o $(UCL_ELFTEXTFILE).o $(INTRODIR)unpack.S \
-	$(EE_LDFLAGS) -Wl,--defsym,_start_bss=$(USR_STARTBSS)
+	$(EE_LDFLAGS) -Wl,--defsym,_start_bss=$(USR_STARTBSS) -Wl,-Map,intro.map
 
 clean:
 	rm -f *.o $(TARGETS)
