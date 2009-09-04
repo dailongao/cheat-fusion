@@ -13,22 +13,39 @@ UnpackText:				//a0=ucl_data_adr aka ram_copy_baseadr,a1=unpack_dst,a2=entry_adr
 	la	$v1,ramUnpack
 	la	$v0,elftext_ucl_data
 	subu	$v1,$v1,$v0
-	addu	$v1,$a0,$v1
-	jalr	$v1
-	move	$s0,$a2
+	addu	$s3,$a0,$v1
 
+	move	$s0,$a0
+	move	$s1,$a1
+	move	$s2,$a2
 
-ramUnpack:
-	bal	__decompress
-	nop
 	li	$3, 0x64
 	move	$4,$0
 	syscall			# FlushCache(0) - Writeback dcache
 	li	$3, 0x64
 	li	$4,2
 	syscall			# FlushCache(2) - Invalidate icache
-	jalr	$s0
+
+	move	$a0,$s0
+	jalr	$s3
+	move	$a1,$s1
+
+
+ramUnpack:
+	bal	__decompress
 	nop
+
+	li	$3, 0x64
+	move	$4,$0
+	syscall			# FlushCache(0) - Writeback dcache
+	li	$3, 0x64
+	li	$4,2
+	syscall			# FlushCache(2) - Invalidate icache
+
+ExecPS2:
+	jalr	$s2
+	nop
+
 
 
 .set noreorder
@@ -162,5 +179,6 @@ getbit:
    andi   $v0, $v0, 1
 .end getbit
 
+.align 4
 text_asm_end:
 	.space 4
