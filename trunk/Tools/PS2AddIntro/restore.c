@@ -8,6 +8,6 @@ void RestoreProcess()
 {
 	memset(_start_bss,0,(_end_bss-_start_bss)+HEAPSIZE);
 	memcpy(_start_bss,elftext_ucl_data,text_asm_end-elftext_ucl_data);
-	UnpackText(_start_bss,(void*)0x100000,0x100000);
+	UnpackText(_start_bss,(void*)TEXTSTARTADR,ELFENTRY);
 }
 
