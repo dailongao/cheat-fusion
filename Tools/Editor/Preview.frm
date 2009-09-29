@@ -951,8 +951,14 @@ Public Sub OnHTMLClick()
             Dim Repeat_Sentence As Long
             Dim tempstr As String
             Dim str() As String
+            Dim blankpos As Integer
             
-            tempstr = Left(g_Script.JpText(g_CurSentence), 30)
+            blankpos = InStr(1, g_Script.JpText(g_CurSentence), " ", 1)
+            If blankpos = 0 Then
+                blankpos = 30
+            End If
+            tempstr = Left(g_Script.JpText(g_CurSentence), blankpos)
+            tempstr = Trim(tempstr)
             tempstr = Mid(tempstr, 2)
             str = Split(tempstr, "-")
             
