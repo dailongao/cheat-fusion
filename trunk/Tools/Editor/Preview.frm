@@ -744,8 +744,15 @@ Private Sub cmdCopyJP_Click()
         Dim Repeat_Sentence As Long
         Dim tempstr As String
         Dim str() As String
+            Dim blankpos As Integer
+            
+            blankpos = InStr(1, g_Script.JpText(g_CurSentence), Chr(10), 1)
+            If blankpos = 0 Then
+                blankpos = 30
+            End If
+        tempstr = Left(g_Script.JpText(g_CurSentence), blankpos)
 
-        tempstr = Left(g_Script.JpText(g_CurSentence), 30)
+        'tempstr = Left(g_Script.JpText(g_CurSentence), 30)
         tempstr = Mid(tempstr, 2)
         str = Split(tempstr, "-")
             
@@ -953,7 +960,7 @@ Public Sub OnHTMLClick()
             Dim str() As String
             Dim blankpos As Integer
             
-            blankpos = InStr(1, g_Script.JpText(g_CurSentence), " ", 1)
+            blankpos = InStr(1, g_Script.JpText(g_CurSentence), Chr(10), 1)
             If blankpos = 0 Then
                 blankpos = 30
             End If

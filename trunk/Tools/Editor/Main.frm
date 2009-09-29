@@ -820,8 +820,15 @@ Private Sub mnuRepeatSync_Click()
                 Dim Repeat_Sentence As Integer
                 Dim tempstr As String
                 Dim str() As String
-
-                tempstr = Left(infopool(I).JpText(j), 30)
+                
+            Dim blankpos As Integer
+            
+            blankpos = InStr(1, infopool(I).JpText(j), Chr(10), 1)
+            If blankpos = 0 Then
+                blankpos = 30
+            End If
+                tempstr = Left(infopool(I).JpText(j), blankpos)
+                'tempstr = Left(infopool(I).JpText(j), 30)
                 tempstr = Mid(tempstr, 2)
                 str = Split(tempstr, "-")
                 
