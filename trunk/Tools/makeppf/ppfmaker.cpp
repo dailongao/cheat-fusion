@@ -96,6 +96,7 @@ void _WritePPFData(FILE* ppfout,FILE* backupout,FILE* isoin,char* fsrc, int offs
     //create iobuf
     char* fdbuf = new char[32768];
     FILE* datain=fopen(fsrc, "rb");
+    if(datain==NULL) return;
     setvbuf(datain, fdbuf, _IOFBF, 32768);
     fseek(datain, 0, SEEK_END);
     int length = ftell(datain);
