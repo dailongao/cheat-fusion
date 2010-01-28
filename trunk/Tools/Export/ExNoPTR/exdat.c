@@ -7,12 +7,13 @@
 #include <conio.h>
 #include "tbl.h"
 
-#define ALIGN4(adr) ((adr+3)&(~3))
+#define ALIGN(adr) (adr)
 #define MINEXCOUNT 2
+#define MAXUNK 1
 
 int IsScriptStart(unsigned int adr)
 {
-	if((adr&3) == 0) return 1;
+	if((adr&1) == 0) return 1;
 	else return 0;
 }
 
@@ -96,15 +97,15 @@ while(!feof(list_fp) && strcmp(readlist,"\n")!=0)
 					}
 					if(sect_flag==1){
 						if(strcmp(str,"{end}")==0) {
-							sect_end=ALIGN4(cur+(4-check));
-							if(found_count>=MINEXCOUNT){
+							sect_end=ALIGN(cur+(4-check));
+							if(found_count>=MINEXCOUNT && hex_count<MAXUNK){
 								strcat(buffer,"{end}\n");
 								fprintf(out_fp,"#### %d <#JMP($%X,$%X)>####\n%s\n",txt_number++,sect_start,sect_end,buffer);
 							}
 							else{//返回句子开头,往后检测
 								cur=sect_start+4-(4-check);
 							}
-							sect_flag=0;found_count=0;end_count=1;
+							sect_flag=0;found_count=0;end_count=1;hex_count=0;
 						}
 						else {
 							if(strchr(str,':') && strchr(str,'{') && strchr(str,'}')){
@@ -142,6 +143,7 @@ while(!feof(list_fp) && strcmp(readlist,"\n")!=0)
 					if(sect_flag==1 && check==3){
 						sprintf(unknown_char,"<$%02X>",ptr[0]);
 						strcat(buffer,unknown_char);
+						hex_count++;
 						break;
 					}
 				}
