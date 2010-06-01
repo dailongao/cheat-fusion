@@ -517,7 +517,7 @@ Private Sub CommonGrid_Init()
         Grid1.TextMatrix(I, 4) = g_CacheInfo(I).sAuthor
         Grid1.TextMatrix(I, 5) = g_CacheInfo(I).sMemo
         
-        If g_CacheInfo(I).nTrans = g_CacheInfo(I).nTotal Then
+        If g_CacheInfo(I).nTrans = g_CacheInfo(I).nTotal Or g_CacheInfo(I).nWords = 0 Then
             If g_ViewUnfinish Then
                 Grid1.RowHeight(I) = 0
             End If
