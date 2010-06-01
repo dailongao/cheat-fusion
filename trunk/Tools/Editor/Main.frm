@@ -507,6 +507,10 @@ Private Sub CommonGrid_Init()
     Dim nc As Integer
     nc = 0
     
+    Dim complete_lst As String
+    complete_lst = ""
+    
+    
     Grid1.rows = UBound(g_CacheInfo) + 1
     
     For I = 1 To UBound(g_CacheInfo)
@@ -524,8 +528,12 @@ Private Sub CommonGrid_Init()
             nc = nc + 1
         End If
         
-        If g_ViewComplete And g_CacheInfo(I).nTrans < g_CacheInfo(I).nTotal Then
-            Grid1.RowHeight(I) = 0
+        If g_ViewComplete Then
+            If g_CacheInfo(I).nTrans < g_CacheInfo(I).nTotal Then
+                Grid1.RowHeight(I) = 0
+            Else
+                complete_lst = complete_lst & g_CacheInfo(I).sID & vbCrLf
+            End If
         End If
     
         If g_hide_repeat And g_CacheInfo(I).nTotal = 0 Then
@@ -536,6 +544,10 @@ Private Sub CommonGrid_Init()
     Dim nstr As String
     nstr = "已完成文件数：" & CStr(nc) & "，未完成文件数：" & CStr(UBound(g_CacheInfo) - nc)
     Form2.info (nstr)
+    
+    If g_ViewComplete Then
+        Tool_WriteTextFile g_Dir & "\completefile.txt", complete_lst
+    End If
     
 End Sub
 
