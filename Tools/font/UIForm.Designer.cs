@@ -259,12 +259,15 @@ namespace Font
             // checkBox1
             // 
             this.checkBox1.AutoSize = true;
+            this.checkBox1.Checked = true;
+            this.checkBox1.CheckState = System.Windows.Forms.CheckState.Checked;
             this.checkBox1.Location = new System.Drawing.Point(496, 213);
             this.checkBox1.Name = "checkBox1";
             this.checkBox1.Size = new System.Drawing.Size(108, 16);
             this.checkBox1.TabIndex = 23;
-            this.checkBox1.Text = "生成8bpp灰度图";
+            this.checkBox1.Text = "存为8bpp灰度图";
             this.checkBox1.UseVisualStyleBackColor = true;
+            this.checkBox1.CheckedChanged += new System.EventHandler(this.checkBox1_CheckedChanged);
             // 
             // checkBox2
             // 
@@ -275,6 +278,7 @@ namespace Font
             this.checkBox2.TabIndex = 24;
             this.checkBox2.Text = "生成8pp raw数据";
             this.checkBox2.UseVisualStyleBackColor = true;
+            this.checkBox2.CheckedChanged += new System.EventHandler(this.checkBox2_CheckedChanged);
             // 
             // UIForm
             // 

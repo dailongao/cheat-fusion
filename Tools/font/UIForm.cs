@@ -136,6 +136,7 @@ namespace Font
             g_slice.Clear(Color.White);
             g_slice.InterpolationMode = InterpolationMode.NearestNeighbor;
             g_slice.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
+            g_slice.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
             g_slice.ScaleTransform(1.0f, float.Parse(textBox5.Text));
             g.Clear(Color.White);
 
@@ -231,6 +232,16 @@ namespace Font
             g_slice.Dispose();
             slice.Dispose();
             richTextBox1.AppendText("OK!\n");
+        }
+
+        private void checkBox2_CheckedChanged(object sender, EventArgs e)
+        {
+            if (checkBox2.Checked == true) checkBox1.Checked = true;
+        }
+
+        private void checkBox1_CheckedChanged(object sender, EventArgs e)
+        {
+            if (checkBox2.Checked == true) checkBox1.Checked = true;
         }
     }
 }
