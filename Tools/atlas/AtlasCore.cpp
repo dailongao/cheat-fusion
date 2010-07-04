@@ -414,9 +414,10 @@ bool AtlasCore::ExecuteCommand(Command& Cmd)
 		{
 			PtrPos = EmbPtrs.GetPointerPosition(PtrNum);
 			PtrValue = EmbPtrs.GetPointerValue(PtrNum);
+			static unsigned int ptroffset = PtrValue - PtrPos -1;
 			if(File.GetMaxWritableBytes() > Size / 8)
 			{
-				File.Write(&PtrValue, Size/8, 1, PtrPos);
+				File.Write(&ptroffset, Size/8, 1, PtrPos);
 				Logger.Log("%6u EMBWRITE  Triggered Write: ScriptPos $%X PointerPos $%X PointerValue $%X Size %dd\n", Cmd.Line,
 					File.GetPos(), PtrPos, PtrValue, Size);
 				Stats.IncEmbPointerWrites();
