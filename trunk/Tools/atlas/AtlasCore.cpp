@@ -414,7 +414,7 @@ bool AtlasCore::ExecuteCommand(Command& Cmd)
 		{
 			PtrPos = EmbPtrs.GetPointerPosition(PtrNum);
 			PtrValue = EmbPtrs.GetPointerValue(PtrNum);
-			static unsigned int ptroffset = PtrValue - PtrPos -1;
+			unsigned int ptroffset = PtrValue - PtrPos -1;
 			if(File.GetMaxWritableBytes() > Size / 8)
 			{
 				File.Write(&ptroffset, Size/8, 1, PtrPos);
