@@ -41,6 +41,8 @@
 _start:
 # Clear bss elf segment (static uninitalised data)
 zerobss:
+	nop
+	nop
 	la	$2, _start_bss
 	la	$3, _end_bss
 loop:
