@@ -15,7 +15,7 @@ using namespace std;
 #define CONVDIR "checked\\%s"
 
 typedef struct _block_attr{
-	char filename[24];
+	char filename[32];
 	int num;
 	int poolpos;
 }block_attr;
