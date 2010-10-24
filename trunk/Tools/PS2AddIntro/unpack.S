@@ -7,13 +7,18 @@
 .global n2e_decompress
 .global text_asm_end
 .extern elftext_ucl_data
-
+.extern PatchExe
+.global patch_args
 
 UnpackText:				//a0=ucl_data_adr aka ram_copy_baseadr,a1=unpack_dst,a2=entry_adr
 	la	$v1,ramUnpack
 	la	$v0,elftext_ucl_data
 	subu	$v1,$v1,$v0
-	addu	$s3,$a0,$v1
+	addu	$s7,$a0,$v1		//ram unpack
+
+	la	$v1,PatchExe
+	subu	$v1,$v1,$v0
+	addu	$s6,$a0,$v1		//ram patchexe
 
 	move	$s0,$a0
 	move	$s1,$a1
@@ -27,13 +32,18 @@ UnpackText:				//a0=ucl_data_adr aka ram_copy_baseadr,a1=unpack_dst,a2=entry_adr
 	syscall			# FlushCache(2) - Invalidate icache
 
 	move	$a0,$s0
-	jalr	$s3
+	jalr	$s7
 	move	$a1,$s1
 
+patch_args:
+	.space 16
 
 ramUnpack:
 	bal	__decompress
 	nop
+
+	jalr	$s6		//patch exe
+	addiu	$a0,$s7,-16
 
 	li	$3, 0x64
 	move	$4,$0
