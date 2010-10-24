@@ -1,14 +1,14 @@
 include $(PS2SDK)/Defs.make
 INTRODIR = E:/CNTranslation/PS2/Common/AddIntro/
 
-UCL_ELFTEXTFILE = slpm
+UCL_ELFTEXTFILE = slps
 USR_RESTOREFILE = restore
 
 USR_STARTADR = 0x100000
 USR_STARTBSS = 0x400000
 USR_HEAPSIZE = 0x10000
 
-ELF_ENTRY = 0x100000
+ELF_ENTRY = 0x100008
 
 
 
@@ -29,9 +29,9 @@ TARGETS = intro.elf
 all: $(TARGETS)
 	ee-strip --strip-all $(TARGETS)
 
-intro.elf: $(INTRODIR)crt0.o $(USR_RESTOREFILE).o main.o $(UCL_ELFTEXTFILE).o $(INTRODIR)unpack.S
+intro.elf: $(INTRODIR)crt0.o main.o $(UCL_ELFTEXTFILE).o $(USR_RESTOREFILE).o $(INTRODIR)unpack.S
 	$(EE_CC) -nostartfiles -Wl,--defsym,_start_address=$(USR_STARTADR) -o $(TARGETS) \
-	$(INTRODIR)crt0.o $(USR_RESTOREFILE).o main.o $(UCL_ELFTEXTFILE).o $(INTRODIR)unpack.S \
+	$(INTRODIR)crt0.o main.o $(UCL_ELFTEXTFILE).o  $(USR_RESTOREFILE).o $(INTRODIR)unpack.S \
 	$(EE_LDFLAGS) -Wl,--defsym,_start_bss=$(USR_STARTBSS) -Wl,-Map,intro.map
 
 clean:
