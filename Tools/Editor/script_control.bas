@@ -110,11 +110,11 @@ Public Function Callback_Save(sentence As String) As String
     
     '所有空格替换为全角的。不然无法对齐。
     '如果极特殊情况想用半角来作对齐，直接编辑文本文件吧。
-    Callback_Save = sentence
-    Callback_Save = Replace(Callback_Save, " ", "　")
-    Callback_Save = Replace(Callback_Save, ",", "，")
-    Callback_Save = Replace(Callback_Save, "?", "？")
-    Callback_Save = Replace(Callback_Save, "!", "！")
+    Callback_Save = Tool_WideConv(sentence)
+    'Callback_Save = Replace(Callback_Save, " ", "　")
+    'Callback_Save = Replace(Callback_Save, ",", "，")
+    'Callback_Save = Replace(Callback_Save, "?", "？")
+    'Callback_Save = Replace(Callback_Save, "!", "！")
 
 End Function
 
